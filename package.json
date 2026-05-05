@@ -1,0 +1,18 @@
+{
+  "name": "recruitex",
+  "private": true,
+  "version": "0.0.1",
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "frontend"
+  ],
+  "scripts": {
+    "db:generate": "npm run generate -w @app/db",
+    "db:migrate": "npm run migrate -w @app/db",
+    "db:push": "npm run push -w @app/db",
+    "db:studio": "npm run studio -w @app/db",
+    "dev:auth": "npm run dev -w auth",
+    "dev:user": "npm run dev -w user"
+  }
+}
