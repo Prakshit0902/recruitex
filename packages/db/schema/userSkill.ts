@@ -1,6 +1,6 @@
 import { integer, pgTable, primaryKey } from "drizzle-orm/pg-core";
-import { users } from "./user";
-import { skills } from "./skill";
+import { users } from "./user.js";
+import { skills } from "./skill.js";
 
 export const userSkills = pgTable(
     'user_skills',

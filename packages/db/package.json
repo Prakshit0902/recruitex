@@ -3,14 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "main": "./index.ts",
-  "types": "./index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./index.ts",
-    "./schema": "./schema/index.ts",
-    "./client": "./client.ts"
+    ".": "./dist/index.js",
+    "./schema": "./dist/schema/index.js",
+    "./client": "./dist/client.js"
   },
   "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
     "push": "drizzle-kit push",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "dotenv": "^17.4.2",
-    "drizzle-kit": "^0.31.10"
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^5.9.3"
   }
 }

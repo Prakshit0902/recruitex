@@ -13,6 +13,7 @@
     "db:push": "npm run push -w @app/db",
     "db:studio": "npm run studio -w @app/db",
     "dev:auth": "npm run dev -w auth",
-    "dev:user": "npm run dev -w user"
+    "dev:user": "npm run dev -w user",
+    "dev:utils" : "npm run dev -w utils"
   }
 }
