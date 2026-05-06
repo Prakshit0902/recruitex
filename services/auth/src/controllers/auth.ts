@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { forgotPasswordTemplate } from "../template.js";
 import { publishToTopic } from "../producer.js";
+import { redisClient } from "../index.js";
 
 dotenv.config()
 
@@ -283,6 +284,12 @@ export const forgotPassword = TryCatch(async (req,res,next) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
 
+    await redisClient.set(`forgot:${email}`,resetToken, {
+        EX : 15 * 60 
+    }) 
+
+
+
     const message = {
         to : email,
         subject : 'Password Reset Request',
@@ -293,10 +300,63 @@ export const forgotPassword = TryCatch(async (req,res,next) => {
     .catch((error) => {
         console.error('Error publishing forgot password email to Kafka topic:', error);
     })
-    
+
 
     res.json({
         message : 'Password reset link has been sent to your email'
     })
 
+})
+
+export const resetPassword = TryCatch(async (req,res,next) => {
+    const {token} = req.params
+    const {password} = req.body
+
+    let decoded : any
+
+    try {
+        decoded = jwt.verify(token as string,process.env.JWT_SECRET_KEY as string)
+
+    } catch (error) {
+        throw new ErrorHandler(400,'Invalid or expired token')
+    }
+
+    if (decoded.type !== 'reset'){
+        throw new ErrorHandler(400,'Invalid token type')
+    }   
+
+    const email = decoded.email
+
+    const storedToken = await redisClient.get(`forgot:${email}`)
+
+    if (!storedToken || storedToken !== token){
+        throw new ErrorHandler(400,'Invalid or expired token')
+    }
+
+    const userList = await db
+        .select({userId : users.userId})
+        .from(users)
+        .where(eq(users.email,email))
+        .limit(1)
+
+    if (userList.length === 0){
+        throw new ErrorHandler(404,'User with this email does not exist')
+    
+    }
+
+    const user = userList[0]
+    const hashPassword = await bcrypt.hash(password,10)
+
+    await db
+        .update(users)
+        .set({password : hashPassword})
+        .where(eq(users.userId,user.userId))
+
+    await redisClient.del(`forgot:${email}`)
+
+    res.json({
+        message : 'Password has been reset successfully'
+    })
+
+    
 })
