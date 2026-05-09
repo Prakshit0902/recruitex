@@ -1,11 +1,9 @@
 import { skills, users, userSkills } from "@app/db/schema";
 import { AuthenticatedRequest, User } from "../middlewares/auth.js";
 import { TryCatch } from "../utils/tryCatch.js";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql,and } from "drizzle-orm";
 import { db } from "@app/db/client";
-import { PgSerial } from "drizzle-orm/pg-core";
 import ErrorHandler from "../utils/errorHandler.js";
-import e from "express";
 import FormData from "form-data";
 import axios from "axios";
 
@@ -300,6 +298,53 @@ export const updateUserSkills = TryCatch(async(req :AuthenticatedRequest,res) =>
         }
     )
 
+})
+
+export const deleteUserSkill = TryCatch(async(req :AuthenticatedRequest,res) => {
+    const user = req.user
+
+    if (!user) {
+        throw new ErrorHandler(401, 'Unauthorized')
+    }
+
+    const {skillName} = req.body
+
+    if (!skillName || typeof skillName !== 'string' || skillName.trim() === '') {
+        throw new ErrorHandler(400, 'Skill name is required')
+    }
+
+    const [skill] = await db
+        .select(
+            {
+                skillId : skills.skillId
+            }
+        )
+        .from(skills)
+        .where(eq(skills.name, skillName.trim()))
+
+    if (!skill) {
+        throw new Error("Skill not found");
+    }
+
+    const result = await db
+        .delete(userSkills)
+        .where(
+            and(
+                eq(userSkills.userId, user.userId),
+                eq(userSkills.skillId, skill.skillId)
+            )
+        )
+        .returning(
+            {
+                userId : userSkills.userId,
+            }
+        )
+
     
+    res.json(
+        {
+            message : result.length > 0 ? "Skill deleted successfully" : "Skill not found for the user"
+        }
+    )
 
 })

@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { myProfile, updateProfilePic, updateResume, updateUserProfile, userProfile } from "../controllers/user.js"
+import { deleteUserSkill, myProfile, updateProfilePic, updateResume, updateUserProfile, updateUserSkills, userProfile } from "../controllers/user.js"
 import { isAuthenticated } from "../middlewares/auth.js"
 import uploadFile from "../middlewares/multer.js"
 
@@ -10,5 +10,8 @@ router.get('/profile/:userId', isAuthenticated, userProfile)
 router.put('/update/profile', isAuthenticated, updateUserProfile)
 router.put('/update/pic', isAuthenticated, uploadFile , updateProfilePic)
 router.put('/update/resume', isAuthenticated, uploadFile , updateResume)
+router.post('/skill/add', isAuthenticated, updateUserSkills)
+router.delete('/skill/delete', isAuthenticated, deleteUserSkill)
+
 
 export default router
