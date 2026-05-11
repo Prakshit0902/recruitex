@@ -14,6 +14,7 @@
     "db:studio": "npm run studio -w @app/db",
     "dev:auth": "npm run dev -w auth",
     "dev:user": "npm run dev -w user",
-    "dev:utils" : "npm run dev -w utils"
+    "dev:utils" : "npm run dev -w utils",
+    "dev:job" : "npm run dev -w job"
   }
 }
