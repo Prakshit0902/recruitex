@@ -68,3 +68,30 @@ export const createCompany = TryCatch(async (req : AuthenticatedRequest,res) => 
 })
 
 
+export const deleteCompany = TryCatch(async(req : AuthenticatedRequest,res) => {
+    const user = req.user
+    if (!user) throw new ErrorHandler(401,"Unauthorized")
+    if (user.role !== 'recruiter') throw new ErrorHandler(403,"Forbidden : Only recruiters can delete a company")
+
+    const {companyId} = req.params
+    const companyList = await db
+        .select()
+        .from(company)
+        .where(eq(company.companyId, Number(companyId)))
+    if (companyList.length === 0) {
+        throw new ErrorHandler(404, "Company not found")
+    }
+
+    const companyToDelete = companyList[0]
+    if (companyToDelete.recruiterId !== user.userId) {
+        throw new ErrorHandler(403, "Forbidden : You can only delete your own company")
+    }
+
+    await db
+        .delete(company)
+        .where(eq(company.companyId, Number(companyId)))
+
+    res.json({
+        message : "Company deleted successfully"
+    })
+})

@@ -6,6 +6,6 @@ import uploadFile from "../middlewares/multer.js"
 const router = Router()
 
 router.post('/company/new',isAuthenticated, uploadFile, createCompany)
-
+router.delete('/company/:companyId',isAuthenticated, deleteCompany)
 
 export default router
