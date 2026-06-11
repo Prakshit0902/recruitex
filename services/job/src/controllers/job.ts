@@ -2,7 +2,7 @@ import { db } from "@app/db/client";
 import { AuthenticatedRequest } from "../middlewares/auth.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { TryCatch } from "../utils/tryCatch.js";
-import { company } from "@app/db/schema";
+import { company, jobs } from "@app/db/schema";
 import { eq } from "drizzle-orm";
 import axios from "axios";
 import FormData from "form-data";
@@ -94,4 +94,63 @@ export const deleteCompany = TryCatch(async(req : AuthenticatedRequest,res) => {
     res.json({
         message : "Company deleted successfully"
     })
+})
+
+export const createJob = TryCatch(async(req : AuthenticatedRequest,res) => {
+    const user = req.user
+
+    if (!user) throw new ErrorHandler(401,"Unauthorized")
+    if (user.role !== 'recruiter') throw new ErrorHandler(403,"Forbidden : Only recruiters can create a job")
+    
+    const {title, description, companyId, location, jobType, skills, role, salary, openings, workLocation} = req.body
+
+    if (!title || !description || !companyId || !location || !jobType || !role || !salary || !openings || !workLocation) {
+        throw new ErrorHandler(400,"Bad Request : Missing required fields")
+    }
+
+    const [com] = await db
+    .select()
+    .from(company)
+    .where(eq(company.companyId, Number(companyId)) && eq(company.recruiterId, user.userId))
+
+    if (!com) {
+        throw new ErrorHandler(404, "Company not found or you don't have permission to add job to this company")
+    }
+
+    const newJob = await db
+            .insert(jobs)
+            .values({
+                title,
+                description,
+                companyId : Number(companyId),
+                location,
+                jobType,
+                role,
+                salary,
+                openings : Number(openings),
+                workLocation,
+                postedByRecruiter : user.userId
+            })
+            .returning({
+                jobId : jobs.jobId,
+                title : jobs.title,
+                description : jobs.description,
+                companyId : jobs.companyId,
+                location : jobs.location,
+                jobType : jobs.jobType,
+                role : jobs.role,
+                salary : jobs.salary,
+                openings : jobs.openings,
+                workLocation : jobs.workLocation,
+                postedByRecruiter : jobs.postedByRecruiter,
+                createdAt : jobs.createdAt,
+                isActive : jobs.isActive
+            })
+
+    res.status(201).json({
+        message : "Job created successfully",
+        job : newJob
+    })
+
+
 })
