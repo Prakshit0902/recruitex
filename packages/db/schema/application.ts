@@ -3,7 +3,7 @@ import { applicationStatusEnum } from "./job.js";
 import { jobs } from "./job.js";
 import { users } from "./user.js";
 
-export const applicationsTable = pgTable(
+export const applications = pgTable(
   "applications",
   {
     applicationId: serial("application_id").primaryKey(),

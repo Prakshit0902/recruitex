@@ -1,7 +1,7 @@
 import { integer, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const company = pgTable(
-    'companies',
+    'company',
     {
         companyId : serial('company_id').primaryKey(),
         name : varchar('name', {length : 255}).notNull().unique(),
