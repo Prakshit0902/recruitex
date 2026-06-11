@@ -152,5 +152,10 @@ export const createJob = TryCatch(async(req : AuthenticatedRequest,res) => {
         job : newJob
     })
 
+})
 
+// TODO : Next Controllers
+export const updateJob = TryCatch(async(req : AuthenticatedRequest,res) => {
+    const { jobId } = req.params
+    const { title, description, location, jobType, skills, role, salary, openings, workLocation } = req.body
 })
