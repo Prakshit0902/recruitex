@@ -7,6 +7,7 @@ export const TryCatch = (controller : (req : Request,res : Response, next : Next
         await controller(req,res,next)
 
     } catch (error : any) {
+        console.error("[TryCatch Error]:", error);
 
         if (error instanceof ErrorHandler){
             return res.status(error.statusCode).json({

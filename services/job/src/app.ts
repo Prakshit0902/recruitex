@@ -9,6 +9,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.use('api/job', jobRoutes)
+app.use('/api/job', jobRoutes)
 
 export default app
