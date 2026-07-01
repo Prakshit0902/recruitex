@@ -1,19 +1,12 @@
 import app from "./app.js";
 import dotenv from 'dotenv'
-import {createClient} from 'redis'
+import { Redis } from "@upstash/redis";
 
 dotenv.config()
 
-export const redisClient = createClient({
-    url : process.env.REDIS_URL
-})
-
-redisClient.connect()
-.then(() => {
-    console.log('Connected to Redis');
-})
-.catch((error) => {
-    console.error('Error connecting to Redis:', error);
+export const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 })
 
 

@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { forgotPasswordTemplate } from "../template.js";
 import { publishToTopic } from "../producer.js";
-import { redisClient } from "../index.js";
+import { redis } from "../index.js";
 
 dotenv.config()
 
@@ -55,11 +55,17 @@ export const registerUser = TryCatch(async (req,res,next) => {
                     email : users.email,
                     phoneNumber : users.phoneNumber,
                     role : users.role, 
-                    bio : users.bio
+                    bio : users.bio,
+                    resume : users.resume,
+                    profilePic : users.profilePic,
+                    subscription : users.subscription
                 }
             )    
 
-            registeredUser = user
+            registeredUser = {
+                ...user,
+                skills: []
+            }
     }
 
     else if (role === 'jobseeker'){
@@ -71,7 +77,7 @@ export const registerUser = TryCatch(async (req,res,next) => {
 
         const form = new FormData()
 
-        form.append('file',file.buffer, {filename : file.originalname})
+        form.append('file',file.buffer, {filename : file.originalname, contentType: file.mimetype})
         
 
         const {data} = await axios.post(`${process.env.UPLOAD_SERVICE}/api/utils/upload`,
@@ -108,12 +114,16 @@ export const registerUser = TryCatch(async (req,res,next) => {
                     role : users.role,
                     bio : users.bio,
                     resume : users.resume,
-                    resumePublicId : users.resumePublicId
+                    profilePic : users.profilePic,
+                    subscription : users.subscription
                 }
             )
 
 
-            registeredUser = user
+            registeredUser = {
+                ...user,
+                skills: []
+            }
         
     }
 
@@ -129,7 +139,7 @@ export const registerUser = TryCatch(async (req,res,next) => {
     
     res.json({
         message : "user registered successfully",
-        registeredUser,
+        user: registeredUser,
         token
     }) 
 })
@@ -284,8 +294,8 @@ export const forgotPassword = TryCatch(async (req,res,next) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
 
-    await redisClient.set(`forgot:${email}`,resetToken, {
-        EX : 15 * 60 
+    await redis.set(`forgot:${email}`,resetToken, {
+        ex : 15 * 60 
     }) 
 
 
@@ -327,7 +337,7 @@ export const resetPassword = TryCatch(async (req,res,next) => {
 
     const email = decoded.email
 
-    const storedToken = await redisClient.get(`forgot:${email}`)
+    const storedToken = await redis.get(`forgot:${email}`)
 
     if (!storedToken || storedToken !== token){
         throw new ErrorHandler(400,'Invalid or expired token')
@@ -352,7 +362,7 @@ export const resetPassword = TryCatch(async (req,res,next) => {
         .set({password : hashPassword})
         .where(eq(users.userId,user.userId))
 
-    await redisClient.del(`forgot:${email}`)
+    await redis.del(`forgot:${email}`)
 
     res.json({
         message : 'Password has been reset successfully'
