@@ -26,7 +26,7 @@ router.post('/upload', upload.single('file'), async (req,res) => {
             )
         }
 
-        if (public_id){
+        if (public_id && typeof public_id === 'string' && public_id.trim() !== '' && public_id !== 'undefined' && public_id !== 'null'){
             await cloudinary.v2.uploader.destroy(public_id)
         }
 
