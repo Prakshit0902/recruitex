@@ -28,7 +28,6 @@ export const userProfile = TryCatch(async(req :AuthenticatedRequest,res) => {
                     userId : users.userId,
                     name : users.name,
                     email : users.email,
-                    password : users.password,
                     phoneNumber : users.phoneNumber,
                     role : users.role,
                     bio : users.bio,
@@ -79,6 +78,48 @@ export const userProfile = TryCatch(async(req :AuthenticatedRequest,res) => {
 
 })
 
+const getFullUser = async (userId: number) => {
+    const userList = await db
+            .select(
+                {
+                    userId : users.userId,
+                    name : users.name,
+                    email : users.email,
+                    phoneNumber : users.phoneNumber,
+                    role : users.role,
+                    bio : users.bio,
+                    resume : users.resume,
+                    resumePublicId : users.resumePublicId,
+                    profilePic : users.profilePic,
+                    profilePicPublicId : users.profilePicPublicId,
+                    subscription : users.subscription,
+    
+                    skills : sql<string[]> `
+                        ARRAY_AGG(${skills.name})
+                        FILTER (WHERE ${skills.name} IS NOT NULL)
+                    `
+                }
+            )
+            .from(users)
+            .leftJoin(
+                userSkills,
+                eq(users.userId, userSkills.userId)
+            )
+            .leftJoin(
+                skills,
+                eq(userSkills.skillId, skills.skillId)
+            )
+            .where(
+                eq(users.userId, userId)
+            )
+            .groupBy(users.userId)
+    
+    if (userList.length === 0) return null;
+    const u = userList[0] as User;
+    u.skills = u.skills || [];
+    return u;
+}
+
 export const updateUserProfile = TryCatch(async(req :AuthenticatedRequest,res) => {
     const user = req.user
 
@@ -92,7 +133,7 @@ export const updateUserProfile = TryCatch(async(req :AuthenticatedRequest,res) =
     const newBio = bio || user.bio
     const newName = name || user.name
 
-    const [updatedUser] = await db
+    await db
         .update(users)
         .set({
             phoneNumber : newPhoneNumber,
@@ -100,23 +141,15 @@ export const updateUserProfile = TryCatch(async(req :AuthenticatedRequest,res) =
             name : newName
         })
         .where(eq(users.userId, user.userId))
-        .returning(
-            {
-                userId : users.userId,
-                name : users.name,
-                email : users.email,
-                phoneNumber : users.phoneNumber,
-                bio : users.bio,    
-            }
-        )
 
+    const fullUser = await getFullUser(user.userId)
 
-        res.json(
-            {
-                message : "User profile updated successfully",
-                user : updatedUser
-            }
-        )
+    res.json(
+        {
+            message : "User profile updated successfully",
+            user : fullUser
+        }
+    )
 })
 
 export const updateProfilePic = TryCatch(async(req :AuthenticatedRequest,res) => {
@@ -127,8 +160,6 @@ export const updateProfilePic = TryCatch(async(req :AuthenticatedRequest,res) =>
     }
 
     const file = req.file
-
-    
 
     if (!file) {
         throw new ErrorHandler(400, 'No file uploaded')
@@ -152,27 +183,22 @@ export const updateProfilePic = TryCatch(async(req :AuthenticatedRequest,res) =>
     console.log(data);
     
 
-    const [updatedUser] = await db
+    await db
         .update(users)
         .set({
             profilePic : data.url,
             profilePicPublicId : data.public_id
         })
         .where(eq(users.userId, user.userId))
-        .returning(
-            {
-                userId : users.userId,
-                name : users.name,
-                profilePic : users.profilePic
-            }
-        )
 
-        res.json(
-            {
-                message : "Profile picture updated successfully",
-                user : updatedUser
-            }
-        )   
+    const fullUser = await getFullUser(user.userId)
+
+    res.json(
+        {
+            message : "Profile picture updated successfully",
+            user : fullUser
+        }
+    )   
 })
 
 export const updateResume = TryCatch(async(req :AuthenticatedRequest,res) => {
@@ -203,27 +229,22 @@ export const updateResume = TryCatch(async(req :AuthenticatedRequest,res) => {
         }
     })
 
-    const [updatedUser] = await db
+    await db
         .update(users)
         .set({
             resume : data.url,
             resumePublicId : data.public_id
         })
         .where(eq(users.userId, user.userId))
-        .returning(
-            {
-                userId : users.userId,
-                name : users.name,
-                resume : users.resume
-            }
-        )
 
-        res.json(
-            {
-                message : "Resume updated successfully",
-                user : updatedUser
-            }
-        )
+    const fullUser = await getFullUser(user.userId)
+
+    res.json(
+        {
+            message : "Resume updated successfully",
+            user : fullUser
+        }
+    )
         
 })
 
