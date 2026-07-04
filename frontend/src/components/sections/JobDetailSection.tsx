@@ -116,7 +116,7 @@ export default function JobDetailSection({ jobId }: { jobId: string }) {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,color-mix(in_oklch,var(--primary)_3%,transparent),transparent_60%)]" />
 
       <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <motion.div variants={fadeUp} initial="hidden" animate={isInView ? "visible" : "hidden"}>
+        <motion.div variants={fadeUp} initial="hidden" animate="visible">
           <Link href="/jobs" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group">
             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
             Back to jobs
@@ -126,7 +126,7 @@ export default function JobDetailSection({ jobId }: { jobId: string }) {
         <motion.div
           variants={scaleIn}
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          animate="visible"
           className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm p-6 lg:p-8 mb-6"
         >
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -163,7 +163,15 @@ export default function JobDetailSection({ jobId }: { jobId: string }) {
               { icon: DollarSign, label: "Salary", value: job.salary || "Negotiable" },
               { icon: Users, label: "Openings", value: String(job.openings) },
               { icon: Building2, label: "Department", value: job.role || "General" },
-              { icon: ExternalLink, label: "Website", value: job.company?.website ? <a href={job.company.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{new URL(job.company.website).hostname}</a> : "—" },
+              { icon: ExternalLink, label: "Website", value: job.company?.website ? <a href={job.company.website.startsWith('http') ? job.company.website : `https://${job.company.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{
+                (() => {
+                  try {
+                    return new URL(job.company.website.startsWith('http') ? job.company.website : `https://${job.company.website}`).hostname;
+                  } catch {
+                    return job.company.website;
+                  }
+                })()
+              }</a> : "—" },
             ].map((item) => (
               <div key={item.label} className="text-center">
                 <item.icon size={18} className="mx-auto text-primary mb-1" />
@@ -181,7 +189,7 @@ export default function JobDetailSection({ jobId }: { jobId: string }) {
               <motion.div
                 variants={fadeUp}
                 initial="hidden"
-                animate={isInView ? "visible" : "hidden"}
+                animate="visible"
                 className="rounded-2xl border border-amber-500/30 bg-amber-500/5 backdrop-blur-sm p-6 lg:p-8 mb-6"
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -301,7 +309,7 @@ export default function JobDetailSection({ jobId }: { jobId: string }) {
               <motion.div
                 variants={fadeUp}
                 initial="hidden"
-                animate={isInView ? "visible" : "hidden"}
+                animate="visible"
                 className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur-sm p-6 lg:p-8 mb-6 relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-5">
@@ -349,7 +357,7 @@ export default function JobDetailSection({ jobId }: { jobId: string }) {
           <motion.div
             variants={fadeUp}
             initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
+            animate="visible"
             className="rounded-2xl border border-border/60 bg-card/30 backdrop-blur-sm p-6 lg:p-8 mb-6 relative overflow-hidden"
           >
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -372,7 +380,7 @@ export default function JobDetailSection({ jobId }: { jobId: string }) {
         <motion.div
           variants={fadeUp}
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          animate="visible"
           custom={1}
           className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur-sm p-6 lg:p-8"
         >

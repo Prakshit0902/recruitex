@@ -14,7 +14,13 @@
     "db:studio": "npm run studio -w @app/db",
     "dev:auth": "npm run dev -w auth",
     "dev:user": "npm run dev -w user",
-    "dev:utils" : "npm run dev -w utils",
-    "dev:job" : "npm run dev -w job"
+    "dev:utils": "npm run dev -w utils",
+    "dev:job": "npm run dev -w job",
+    "dev:ai": "npm run dev -w ai",
+    "dev:db": "npm run dev -w @app/db",
+    "dev": "concurrently -n db,auth,user,job,utils,ai -c red,blue,green,yellow,magenta,cyan \"npm run dev -w @app/db\" \"npm run dev -w auth\" \"npm run dev -w user\" \"npm run dev -w job\" \"npm run dev -w utils\" \"npm run dev -w ai\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
   }
 }
