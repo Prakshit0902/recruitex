@@ -79,6 +79,7 @@ export const deleteCompany = TryCatch(async(req : AuthenticatedRequest,res) => {
     if (user.role !== 'recruiter') throw new ErrorHandler(403,"Forbidden : Only recruiters can delete a company")
 
     const {companyId} = req.params
+    if (isNaN(Number(companyId))) throw new ErrorHandler(400, "Invalid company ID")
     const companyList = await db
         .select()
         .from(company)
@@ -112,6 +113,8 @@ export const createJob = TryCatch(async(req : AuthenticatedRequest,res) => {
     if (!title || !description || !companyId || !location || !jobType || !role || !salary || !openings || !workLocation) {
         throw new ErrorHandler(400,"Bad Request : Missing required fields")
     }
+
+    if (isNaN(Number(companyId))) throw new ErrorHandler(400, "Invalid company ID")
 
     const [com] = await db
     .select()
@@ -209,6 +212,7 @@ export const getAllJobs = TryCatch(async (req: AuthenticatedRequest, res) => {
 
 export const getJobById = TryCatch(async (req: AuthenticatedRequest, res) => {
     const { id } = req.params
+    if (isNaN(Number(id))) throw new ErrorHandler(400, "Invalid job ID")
     const [job] = await db
         .select({
             jobId: jobs.jobId,
@@ -264,6 +268,7 @@ export const getAllCompanies = TryCatch(async (req: AuthenticatedRequest, res) =
 
 export const getCompanyById = TryCatch(async (req: AuthenticatedRequest, res) => {
     const { id } = req.params
+    if (isNaN(Number(id))) throw new ErrorHandler(400, "Invalid company ID")
     const [comp] = await db
         .select()
         .from(company)
@@ -271,7 +276,13 @@ export const getCompanyById = TryCatch(async (req: AuthenticatedRequest, res) =>
 
     if (!comp) throw new ErrorHandler(404, "Company not found")
 
-    res.json({ message: "Company fetched successfully", company: comp })
+    const companyJobs = await db
+        .select()
+        .from(jobs)
+        .where(eq(jobs.companyId, Number(id)))
+        .orderBy(desc(jobs.createdAt))
+
+    res.json({ message: "Company fetched successfully", company: { ...comp, jobs: companyJobs } })
 })
 
 export const applyForJob = TryCatch(async (req: AuthenticatedRequest, res) => {
@@ -281,6 +292,7 @@ export const applyForJob = TryCatch(async (req: AuthenticatedRequest, res) => {
 
     const { jobId } = req.body
     if (!jobId) throw new ErrorHandler(400, "Job ID is required")
+    if (isNaN(Number(jobId))) throw new ErrorHandler(400, "Invalid job ID")
 
     const [existingJob] = await db
         .select()
@@ -348,7 +360,10 @@ export const getUserApplications = TryCatch(async (req: AuthenticatedRequest, re
         status: a.status,
         resume: a.resume,
         subscribed: a.subscribed,
-        createdAt: a.appliedAt,
+        appliedAt: a.appliedAt,
+        jobTitle: a.jobTitle,
+        jobLocation: a.jobLocation,
+        jobSalary: null, // salary not joined here; extend if needed
         job: a.jobTitle ? {
             jobId: a.jobId,
             title: a.jobTitle,
@@ -367,6 +382,7 @@ export const getJobApplications = TryCatch(async (req: AuthenticatedRequest, res
     if (user.role !== "recruiter") throw new ErrorHandler(403, "Only recruiters can view applicants")
 
     const { jobId } = req.params
+    if (isNaN(Number(jobId))) throw new ErrorHandler(400, "Invalid job ID")
 
     const [existingJob] = await db
         .select()
@@ -412,4 +428,76 @@ export const getJobApplications = TryCatch(async (req: AuthenticatedRequest, res
     }))
 
     res.json({ message: "Applications fetched successfully", applications: formatted })
+})
+
+export const updateApplicationStatus = TryCatch(async (req: AuthenticatedRequest, res) => {
+    const user = req.user
+    if (!user) throw new ErrorHandler(401, "Unauthorized")
+    if (user.role !== "recruiter") throw new ErrorHandler(403, "Only recruiters can update application status")
+
+    const { applicationId } = req.params
+    const { status } = req.body
+
+    if (!status) throw new ErrorHandler(400, "Status is required")
+
+    const validStatuses = ["Submitted", "Screening", "Interview", "Assignment", "Final Review", "Offer", "Hired", "Rejected"]
+    if (!validStatuses.includes(status)) throw new ErrorHandler(400, "Invalid status value")
+
+    const [updated] = await db
+        .update(applications)
+        .set({ status })
+        .where(eq(applications.applicationId, Number(applicationId)))
+        .returning()
+
+    if (!updated) throw new ErrorHandler(404, "Application not found")
+
+    res.json({ message: `Application status updated to ${status}`, application: updated })
+})
+
+export const deleteJob = TryCatch(async (req: AuthenticatedRequest, res) => {
+    const user = req.user
+    if (!user) throw new ErrorHandler(401, "Unauthorized")
+
+    const { id } = req.params
+    if (isNaN(Number(id))) throw new ErrorHandler(400, "Invalid job ID")
+
+    const [job] = await db.select().from(jobs).where(eq(jobs.jobId, Number(id)))
+    if (!job) throw new ErrorHandler(404, "Job not found")
+    if (job.postedByRecruiter !== user.userId) throw new ErrorHandler(403, "You can only delete your own jobs")
+
+    await db.delete(applications).where(eq(applications.jobId, Number(id)))
+    await db.delete(jobs).where(eq(jobs.jobId, Number(id)))
+
+    res.json({ message: "Job deleted successfully" })
+})
+
+export const updateJob = TryCatch(async (req: AuthenticatedRequest, res) => {
+    const user = req.user
+    if (!user) throw new ErrorHandler(401, "Unauthorized")
+
+    const { id } = req.params
+    if (isNaN(Number(id))) throw new ErrorHandler(400, "Invalid job ID")
+    const { title, description, role, salary, location, openings, jobType, workLocation, isActive } = req.body
+
+    const [job] = await db.select().from(jobs).where(eq(jobs.jobId, Number(id)))
+    if (!job) throw new ErrorHandler(404, "Job not found")
+    if (job.postedByRecruiter !== user.userId) throw new ErrorHandler(403, "You can only update your own jobs")
+
+    const [updated] = await db
+        .update(jobs)
+        .set({
+            ...(title && { title }),
+            ...(description && { description }),
+            ...(role && { role }),
+            ...(salary !== undefined && { salary: Number(salary) }),
+            ...(location && { location }),
+            ...(openings !== undefined && { openings: Number(openings) }),
+            ...(jobType && { jobType }),
+            ...(workLocation && { workLocation }),
+            ...(isActive !== undefined && { isActive }),
+        })
+        .where(eq(jobs.jobId, Number(id)))
+        .returning()
+
+    res.json({ message: "Job updated successfully", job: updated })
 })
