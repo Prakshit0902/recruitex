@@ -1,19 +1,19 @@
-import Hero from "@/components/sections/Hero"
-import Stats from "@/components/sections/Stats"
-import Features from "@/components/sections/Features"
-import HowItWorks from "@/components/sections/HowItWorks"
-import TrendingRoles from "@/components/sections/TrendingRoles"
-import CTA from "@/components/sections/CTA"
+"use client";
+import Loading from "@/components/loading";
+import RecruiterLandingPage from "@/components/recruiter/RecruiterLandingPage";
+import JobSeekerLandingPage from "@/components/JobSeekerLandingPage";
+import { useAppData } from "@/context/AppContext";
+import React from "react";
 
-export default function Home() {
-  return (
-    <>
-      <Hero />
-      <Stats />
-      <Features />
-      <HowItWorks />
-      <TrendingRoles />
-      <CTA />
-    </>
-  )
-}
+const Home = () => {
+  const { loading, user, isAuth } = useAppData();
+  if (loading) return <Loading />;
+
+  if (isAuth && user?.role === "recruiter") {
+    return <RecruiterLandingPage />;
+  }
+
+  return <JobSeekerLandingPage />;
+};
+
+export default Home;
