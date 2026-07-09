@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 .agents
 skills-lock.json
 temp/
+# Scratch files and scripts
+**/scratch/
