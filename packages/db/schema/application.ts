@@ -18,6 +18,7 @@ export const applications = pgTable(
     resume: varchar("resume", { length: 255 }).notNull(),
     appliedAt: timestamp("applied_at", { withTimezone: true }).notNull().defaultNow(),
     subscribed: boolean("subscribed"),
+    interviewScore: integer("interview_score"),
   },
   (table) => ({
     uniqueApplicantPerJob: unique().on(table.jobId, table.applicantId),

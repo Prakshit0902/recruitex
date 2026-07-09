@@ -18,7 +18,10 @@
     "dev:job": "npm run dev -w job",
     "dev:ai": "npm run dev -w ai",
     "dev:db": "npm run dev -w @app/db",
-    "dev": "concurrently -n db,auth,user,job,utils,ai -c red,blue,green,yellow,magenta,cyan \"npm run dev -w @app/db\" \"npm run dev -w auth\" \"npm run dev -w user\" \"npm run dev -w job\" \"npm run dev -w utils\" \"npm run dev -w ai\""
+    "dev:blog": "npm run dev -w blog",
+    "dev:chat": "npm run dev -w chat",
+    "dev:payment": "npm run dev -w payment",
+    "dev": "concurrently -n db,auth,user,job,utils,ai,blog,chat,payment -c red,blue,green,yellow,magenta,cyan,white,gray,black \"npm run dev -w @app/db\" \"npm run dev -w auth\" \"npm run dev -w user\" \"npm run dev -w job\" \"npm run dev -w utils\" \"npm run dev -w ai\" \"npm run dev -w blog\" \"npm run dev -w chat\" \"npm run dev -w payment\""
   },
   "devDependencies": {
     "concurrently": "^10.0.3"

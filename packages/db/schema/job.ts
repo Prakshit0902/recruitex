@@ -4,7 +4,7 @@ import { company } from "./company.js";
 
 export const jobTypeEnum = pgEnum('job_type',['full_time','part_time','internship','contract'])
 export const workLocationEnum = pgEnum('work_location',['remote','on_site','hybrid'])
-export const applicationStatusEnum = pgEnum('application_status',['submitted','rejected','hired'])
+export const applicationStatusEnum = pgEnum('application_status',['submitted','rejected','hired','Interview'])
 
 
 export const jobs = pgTable(
