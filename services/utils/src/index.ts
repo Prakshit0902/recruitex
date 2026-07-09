@@ -1,11 +1,9 @@
-import express from 'express'
-import dotenv from  'dotenv'
-import routes from './routes.js'
-import cors from 'cors'
-import {v2 as cloudinary} from 'cloudinary'
-import { startSendMailConsumer } from './consumer.js'
-
-dotenv.config()
+import 'dotenv/config.js';
+import express from 'express';
+import routes from './routes.js';
+import cors from 'cors';
+import { v2 as cloudinary } from 'cloudinary';
+import { startSendMailConsumer } from './consumer.js';
 
 /*
  * Initializes and starts the Kafka consumer for sending emails.

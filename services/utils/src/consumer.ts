@@ -1,8 +1,6 @@
+import 'dotenv/config.js';
 import { Kafka } from "kafkajs";
-import nodemailer from 'nodemailer'
-import dotenv from 'dotenv'
-
-dotenv.config()
+import nodemailer from 'nodemailer';
 
 export const startSendMailConsumer = async () => {
     try {
