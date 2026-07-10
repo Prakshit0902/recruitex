@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { sql } from "@app/db/client";
+import { db } from "@app/db/client";
+import { users } from "@app/db/schema";
+import { eq } from "drizzle-orm";
 
 export interface AuthenticatedRequest extends Request {
   user?: any;
@@ -27,13 +29,13 @@ export const isAuth = async (
       process.env.JWT_SECRET_KEY as string
     ) as { userId: number };
 
-    const users = await sql`SELECT * FROM users WHERE user_id = ${decoded.userId}`;
+    const usersResult = await db.select().from(users).where(eq(users.userId, decoded.userId));
 
-    if (users.length === 0) {
+    if (usersResult.length === 0) {
       return res.status(401).json({ message: "Invalid token — user not found" });
     }
 
-    req.user = users[0];
+    req.user = usersResult[0];
     next();
   } catch (error: any) {
     return res.status(401).json({ message: "Invalid or expired token" });
