@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { sql } from "../utils/db.js";
+import { db } from "@app/db/client";
+import { users } from "@app/db/schema";
+import { eq } from "drizzle-orm";
 
 // Minimal User interface for Blog Service
 export interface User {
@@ -39,7 +41,7 @@ export const isAuth = async (
             process.env.JWT_SECRET_KEY
         ) as JwtPayload;
 
-        if (!decodedPayload || !decodedPayload.id) {
+        if (!decodedPayload || !decodedPayload.userId) {
             res.status(401).json({
                 message: "Invalid Token",
             });
@@ -50,20 +52,20 @@ export const isAuth = async (
         // Ideally we trust token if it has role, but let's verify existence to be safe similar to user service.
         // Assuming we access the SAME database.
 
-        const users = await sql`
-      SELECT user_id, name, role 
-      FROM users 
-      WHERE user_id = ${decodedPayload.id}
-    `;
+        const usersResult = await db.select({
+            user_id: users.userId,
+            name: users.name,
+            role: users.role
+        }).from(users).where(eq(users.userId, decodedPayload.userId));
 
-        if (users.length === 0) {
+        if (usersResult.length === 0) {
             res.status(401).json({
                 message: "User not found",
             });
             return;
         }
 
-        const user = users[0] as User;
+        const user = usersResult[0] as User;
         req.user = user;
         next();
     } catch (error) {

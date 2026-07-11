@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { sql } from "../utils/db.js";
+import { db } from "@app/db/client";
+import { users, userSkills, skills } from "@app/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 interface User {
     user_id: number;
@@ -50,23 +52,34 @@ export const isAuth = async (
             return;
         }
 
-        const users = await sql`
-    SELECT u.user_id, u.name, u.email, u.phone_number, u.role, u.bio, u.resume, u.resume_public_id, u.profile_pic, u.profile_pic_public_id, u.subscription,
-    ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as skills
-    FROM users u LEFT JOIN user_skills us ON u.user_id = us.user_id
-    LEFT JOIN skills s ON us.skill_id = s.skill_id
-    WHERE u.user_id = ${decodedPayload.userId}
-    GROUP BY u.user_id;
-    `;
+        const usersResult = await db.select({
+          user_id: users.userId,
+          name: users.name,
+          email: users.email,
+          phone_number: users.phoneNumber,
+          role: users.role,
+          bio: users.bio,
+          resume: users.resume,
+          resume_public_id: users.resumePublicId,
+          profile_pic: users.profilePic,
+          profile_pic_public_id: users.profilePicPublicId,
+          subscription: users.subscription,
+          skills: sql<string[]>`ARRAY_AGG(${skills.name}) FILTER (WHERE ${skills.name} IS NOT NULL)`
+        })
+        .from(users)
+        .leftJoin(userSkills, eq(users.userId, userSkills.userId))
+        .leftJoin(skills, eq(userSkills.skillId, skills.skillId))
+        .where(eq(users.userId, decodedPayload.userId))
+        .groupBy(users.userId);
 
-        if (users.length === 0) {
+        if (usersResult.length === 0) {
             res.status(401).json({
                 message: "User associated with this token no longer exists.",
             });
             return;
         }
 
-        const user = users[0] as User;
+        const user = usersResult[0] as User;
 
         user.skills = user.skills || [];
 
