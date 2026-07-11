@@ -7,7 +7,8 @@
  *   3. queryResumeVsJob() — question + job description → context-aware answer
  */
 
-import { sql } from "@app/db/client";
+import { db } from "@app/db/client";
+import { sql } from "drizzle-orm";
 import { generateEmbedding } from "./embedding.js";
 import { PDFParse } from "pdf-parse";
 import Groq from "groq-sdk";
@@ -228,8 +229,8 @@ export async function processResume(
   }
 
   // 2. Delete old embeddings (re-index strategy)
-  await sql`DELETE FROM resume_chunks WHERE user_id = ${userId}`;
-  await sql`DELETE FROM resume_structured WHERE user_id = ${userId}`;
+  await db.execute(sql`DELETE FROM resume_chunks WHERE user_id = ${userId}`);
+  await db.execute(sql`DELETE FROM resume_structured WHERE user_id = ${userId}`);
 
   // 3. Chunk the resume
   const chunks = chunkResumeText(fullText);
@@ -242,25 +243,25 @@ export async function processResume(
     const embedding = await generateEmbedding(chunk.text);
     const embeddingStr = `[${embedding.join(",")}]`;
 
-    await sql`
+    await db.execute(sql`
       INSERT INTO resume_chunks (user_id, chunk_text, section_type, embedding)
       VALUES (${userId}, ${chunk.text}, ${chunk.sectionType}, ${embeddingStr}::vector)
-    `;
+    `);
   }
 
   // 6. Store structured data
-  await sql`
+  await db.execute(sql`
     INSERT INTO resume_structured (user_id, skills, experience_summary, projects, education, full_text, processed_at)
     VALUES (
       ${userId},
-      ${structured.skills},
+      ${JSON.stringify(structured.skills)},
       ${structured.experience_summary},
-      ${structured.projects},
+      ${JSON.stringify(structured.projects)},
       ${structured.education},
       ${fullText.substring(0, 10000)},
       NOW()
     )
-  `;
+  `);
 
   console.log(
     `✅ Resume indexed for user ${userId}: ${chunks.length} chunks, ${structured.skills.length} skills extracted`
@@ -288,9 +289,10 @@ export async function queryResume(
   question: string
 ): Promise<QueryResult> {
   // 1. Check if resume is indexed
-  const chunks = await sql`
+  const chunksResult = await db.execute(sql`
     SELECT COUNT(*) as count FROM resume_chunks WHERE user_id = ${userId}
-  `;
+  `);
+  const chunks = ((chunksResult as any).rows || chunksResult) as any[];
 
   if (!chunks[0] || Number(chunks[0].count) === 0) {
     return {
@@ -306,7 +308,7 @@ export async function queryResume(
   const embeddingStr = `[${queryEmbedding.join(",")}]`;
 
   // 3. Retrieve top-k chunks by cosine similarity
-  const topChunks = await sql`
+  const topChunksResult = await db.execute(sql`
     SELECT
       chunk_text,
       section_type,
@@ -315,7 +317,8 @@ export async function queryResume(
     WHERE user_id = ${userId}
     ORDER BY embedding <=> ${embeddingStr}::vector
     LIMIT 5
-  `;
+  `);
+  const topChunks = ((topChunksResult as any).rows || topChunksResult) as any[];
 
   // 4. Query guardrail — check if any chunks are relevant enough
   const relevantChunks = topChunks.filter(
@@ -340,12 +343,13 @@ export async function queryResume(
     .join("\n\n---\n\n");
 
   // 6. Also fetch structured data for extra context
-  const structuredRows = await sql`
+  const structuredRowsResult = await db.execute(sql`
     SELECT skills, experience_summary, projects, education
     FROM resume_structured
     WHERE user_id = ${userId}
-  `;
-  const structured = structuredRows[0] || {};
+  `);
+  const structuredRows = ((structuredRowsResult as any).rows || structuredRowsResult) as any[];
+  const structured: any = structuredRows[0] || {};
 
   let structuredContext = "";
   if (structured.skills?.length > 0) {
@@ -403,9 +407,10 @@ export async function queryResumeVsJob(
   jobDescription: string
 ): Promise<QueryResult> {
   // 1. Check if resume is indexed
-  const chunks = await sql`
+  const chunksResult = await db.execute(sql`
     SELECT COUNT(*) as count FROM resume_chunks WHERE user_id = ${userId}
-  `;
+  `);
+  const chunks = ((chunksResult as any).rows || chunksResult) as any[];
 
   if (!chunks[0] || Number(chunks[0].count) === 0) {
     return {
@@ -422,7 +427,7 @@ export async function queryResumeVsJob(
   const embeddingStr = `[${queryEmbedding.join(",")}]`;
 
   // 3. Retrieve top-k chunks by cosine similarity
-  const topChunks = await sql`
+  const topChunksResult = await db.execute(sql`
     SELECT
       chunk_text,
       section_type,
@@ -431,7 +436,8 @@ export async function queryResumeVsJob(
     WHERE user_id = ${userId}
     ORDER BY embedding <=> ${embeddingStr}::vector
     LIMIT 6
-  `;
+  `);
+  const topChunks = ((topChunksResult as any).rows || topChunksResult) as any[];
 
   const relevantChunks = topChunks.filter(
     (c: any) => Number(c.similarity) >= RELEVANCE_THRESHOLD
@@ -455,12 +461,13 @@ export async function queryResumeVsJob(
     .join("\n\n---\n\n");
 
   // 5. Fetch structured data
-  const structuredRows = await sql`
+  const structuredRowsResult = await db.execute(sql`
     SELECT skills, experience_summary, projects, education
     FROM resume_structured
     WHERE user_id = ${userId}
-  `;
-  const structured = structuredRows[0] || {};
+  `);
+  const structuredRows = ((structuredRowsResult as any).rows || structuredRowsResult) as any[];
+  const structured: any = structuredRows[0] || {};
 
   // 6. Generate answer
   const prompt = `
@@ -511,16 +518,18 @@ Provide a clear, comparative analysis:
 export async function getResumeStatus(
   userId: number
 ): Promise<{ indexed: boolean; chunksCount: number; processedAt: string | null; structured: any | null }> {
-  const chunks = await sql`
+  const chunksResult = await db.execute(sql`
     SELECT COUNT(*) as count FROM resume_chunks WHERE user_id = ${userId}
-  `;
+  `);
+  const chunks = ((chunksResult as any).rows || chunksResult) as any[];
 
-  const structuredRows = await sql`
+  const structuredRowsResult = await db.execute(sql`
     SELECT * FROM resume_structured WHERE user_id = ${userId}
-  `;
+  `);
+  const structuredRows = ((structuredRowsResult as any).rows || structuredRowsResult) as any[];
 
   const count = Number(chunks[0]?.count || 0);
-  const structured = structuredRows[0] || null;
+  const structured: any = structuredRows[0] || null;
 
   return {
     indexed: count > 0,
