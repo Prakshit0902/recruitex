@@ -1,7 +1,9 @@
 import { TryCatch } from "../utils/TryCatch.js";
 import { AuthenticatedRequest } from "../middlewares/auth.js";
 import ErrorHandler from "../utils/errorHandler.js";
-import { sql } from "../utils/db.js";
+import { db } from "@app/db/client";
+import { users } from "@app/db/schema";
+import { eq } from "drizzle-orm";
 import { instance } from "../index.js";
 import crypto from "crypto";
 
@@ -12,7 +14,8 @@ export const checkOut = TryCatch(async (req: AuthenticatedRequest, res) => {
 
   const user_id = req.user.user_id;
 
-  const [user] = await sql`SELECT * FROM users WHERE user_id = ${user_id}`;
+  const usersResult = await db.select().from(users).where(eq(users.userId, user_id));
+  const user = usersResult[0];
 
   const subTime = user?.subscription
     ? new Date(user.subscription).getTime()
@@ -72,8 +75,8 @@ export const paymentVerification = TryCatch(
 
       const expiryDate = new Date(now.getTime() + thirtyDays);
 
-      const [updatedUser] =
-        await sql`UPDATE users SET subscription = ${expiryDate} WHERE user_id = ${user?.user_id} RETURNING *`;
+      const updatedUsersResult = await db.update(users).set({ subscription: expiryDate }).where(eq(users.userId, user?.user_id as number)).returning();
+      const updatedUser = updatedUsersResult[0];
 
       res.json({
         message: "Subscription Purchased Successfully",

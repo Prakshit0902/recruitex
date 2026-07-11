@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
-import { sql } from "../utils/db.js";
+import { db } from "@app/db/client";
+import { blogPosts } from "@app/db/schema";
+import { eq, and, or, sql, desc, ilike, arrayContains } from "drizzle-orm";
 import { CreatePostSchema, UpdatePostSchema } from "../models/post.model.js";
 import { AuthenticatedRequest } from "../middlewares/auth.js";
 import { ZodError } from "zod";
@@ -28,21 +30,24 @@ export const createPost = async (req: AuthenticatedRequest, res: Response): Prom
             return;
         }
 
-        const { title, tags, cover_image, sections } = validation.data;
+        const { title, tags, coverImage, sections } = validation.data;
         const slug = validation.data.slug || generateSlug(title);
 
         // Check if slug exists
-        const existing = await sql`SELECT id FROM blog_posts WHERE slug = ${slug}`;
+        const existing = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, slug));
         if (existing.length > 0) {
             res.status(400).json({ message: "Slug already exists. Please choose a different title or slug." });
             return;
         }
 
-        const result = await sql`
-      INSERT INTO blog_posts (title, slug, author_id, tags, cover_image, sections)
-      VALUES (${title}, ${slug}, ${user.user_id}, ${tags || []}, ${cover_image || null}, ${JSON.stringify(sections)})
-      RETURNING *
-    `;
+        const result = await db.insert(blogPosts).values({
+            title,
+            slug,
+            authorId: user.user_id,
+            tags: tags || [],
+            coverImage: coverImage || null,
+            sections: sections
+        }).returning();
 
         // Invalidate caches
         const keys = await redisClient.keys('blog:posts:all:*');
@@ -71,36 +76,27 @@ export const getAllPosts = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        let query = sql`SELECT * FROM blog_posts WHERE 1=1`;
-        let countQuery = sql`SELECT COUNT(*) FROM blog_posts WHERE 1=1`;
         let posts;
         let total;
+        
+        let conditions = [];
+        if (search) conditions.push(ilike(blogPosts.title, `%${search}%`));
+        if (tag) conditions.push(sql`${tag}::text = ANY(${blogPosts.tags})`);
+        
+        const finalCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-        if (search) {
-            posts = await sql`
-        SELECT * FROM blog_posts 
-        WHERE (${search}::text IS NULL OR title ILIKE ${'%' + search + '%'})
-        AND (${tag}::text IS NULL OR ${tag} = ANY(tags))
-        ORDER BY created_at DESC
-        LIMIT ${Number(limit)} OFFSET ${offset}
-      `;
-            total = await sql`
-        SELECT COUNT(*) FROM blog_posts 
-        WHERE (${search}::text IS NULL OR title ILIKE ${'%' + search + '%'})
-        AND (${tag}::text IS NULL OR ${tag} = ANY(tags))
-      `;
-        } else {
-            posts = await sql`
-      SELECT * FROM blog_posts 
-      ORDER BY created_at DESC
-      LIMIT ${Number(limit)} OFFSET ${offset}
-    `;
-            total = await sql`SELECT COUNT(*) FROM blog_posts`;
-        }
+        posts = await db.select().from(blogPosts)
+            .where(finalCondition)
+            .orderBy(desc(blogPosts.createdAt))
+            .limit(Number(limit))
+            .offset(offset);
+            
+        const countResult = await db.select({ total: sql<number>`COUNT(*)::int` }).from(blogPosts).where(finalCondition);
+        total = countResult[0].total;
 
         const response = {
             posts,
-            total: total[0].count,
+            total,
             page: Number(page),
             limit: Number(limit)
         };
@@ -116,7 +112,7 @@ export const getAllPosts = async (req: Request, res: Response): Promise<void> =>
 
 export const getPostBySlug = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { slug } = req.params; // Treat ID param as slug or create dedicated endpoint
+        const slug = req.params.slug as string; // Treat ID param as slug or create dedicated endpoint
         // Assuming /:idOrSlug
 
         const cacheKey = `blog:post:${slug}`;
@@ -128,7 +124,12 @@ export const getPostBySlug = async (req: Request, res: Response): Promise<void> 
         }
 
         // Check if UUID or Slug. Actually let's assume slug for public URL.
-        const result = await sql`SELECT * FROM blog_posts WHERE slug = ${slug} OR id::text = ${slug}`;
+        let postCondition = eq(blogPosts.slug, slug);
+        if (!isNaN(Number(slug))) {
+            postCondition = or(eq(blogPosts.slug, slug), eq(blogPosts.id, Number(slug))) as any;
+        }
+
+        const result = await db.select().from(blogPosts).where(postCondition);
 
         if (result.length === 0) {
             res.status(404).json({ message: "Post not found" });
@@ -156,7 +157,7 @@ export const updatePost = async (req: AuthenticatedRequest, res: Response): Prom
         }
 
         // functionality to verify ownership
-        const existing = await sql`SELECT author_id, slug FROM blog_posts WHERE id = ${id}`;
+        const existing = await db.select({ author_id: blogPosts.authorId, slug: blogPosts.slug }).from(blogPosts).where(eq(blogPosts.id, Number(id)));
         if (existing.length === 0) {
             res.status(404).json({ message: "Post not found" });
             return;
@@ -173,19 +174,15 @@ export const updatePost = async (req: AuthenticatedRequest, res: Response): Prom
             return;
         }
 
-        const { title, tags, cover_image, sections, slug } = validation.data;
-        const result = await sql`
-        UPDATE blog_posts 
-        SET 
-          title = COALESCE(${title}, title),
-          slug = COALESCE(${slug}, slug),
-          tags = COALESCE(${tags}, tags),
-          cover_image = COALESCE(${cover_image}, cover_image),
-          sections = COALESCE(${JSON.stringify(sections) as any}, sections),
-          updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${id}
-        RETURNING *
-     `;
+        const { title, tags, coverImage, sections, slug } = validation.data;
+        const result = await db.update(blogPosts).set({
+            title: title ?? undefined,
+            slug: slug ?? undefined,
+            tags: tags ?? undefined,
+            coverImage: coverImage ?? undefined,
+            sections: sections ?? undefined,
+            updatedAt: new Date()
+        }).where(eq(blogPosts.id, Number(id))).returning();
 
         // Invalidate specific post cache
         await redisClient.del(`blog:post:${result[0].slug}`);
@@ -217,7 +214,7 @@ export const deletePost = async (req: AuthenticatedRequest, res: Response): Prom
             return;
         }
 
-        const existing = await sql`SELECT author_id FROM blog_posts WHERE id = ${id}`;
+        const existing = await db.select({ author_id: blogPosts.authorId }).from(blogPosts).where(eq(blogPosts.id, Number(id)));
         if (existing.length === 0) {
             res.status(404).json({ message: "Post not found" });
             return;
@@ -228,7 +225,7 @@ export const deletePost = async (req: AuthenticatedRequest, res: Response): Prom
             return;
         }
 
-        const deletedPost = await sql`DELETE FROM blog_posts WHERE id = ${id} RETURNING slug`;
+        const deletedPost = await db.delete(blogPosts).where(eq(blogPosts.id, Number(id))).returning({ slug: blogPosts.slug });
 
         if (deletedPost.length > 0) {
             await redisClient.del(`blog:post:${deletedPost[0].slug}`);
@@ -267,21 +264,18 @@ export const getMyPosts = async (req: AuthenticatedRequest, res: Response): Prom
             return;
         }
 
-        const posts = await sql`
-            SELECT * FROM blog_posts 
-            WHERE author_id = ${user.user_id} 
-            ORDER BY created_at DESC
-            LIMIT ${Number(limit)} OFFSET ${offset}
-        `;
+        const posts = await db.select().from(blogPosts)
+            .where(eq(blogPosts.authorId, user.user_id))
+            .orderBy(desc(blogPosts.createdAt))
+            .limit(Number(limit))
+            .offset(offset);
 
-        const total = await sql`
-            SELECT COUNT(*) FROM blog_posts 
-            WHERE author_id = ${user.user_id}
-        `;
+        const countResult = await db.select({ total: sql<number>`COUNT(*)::int` }).from(blogPosts).where(eq(blogPosts.authorId, user.user_id));
+        const total = countResult[0].total;
 
         const response = {
             posts,
-            total: total[0].count,
+            total,
             page: Number(page),
             limit: Number(limit)
         };

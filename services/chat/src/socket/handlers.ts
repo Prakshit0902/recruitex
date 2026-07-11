@@ -1,6 +1,8 @@
 import { Server, Socket } from "socket.io";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { sql } from "../utils/db.js";
+import { db } from "@app/db/client";
+import { users, conversations, messages, jobs } from "@app/db/schema";
+import { eq, and, or, ne } from "drizzle-orm";
 import { redisClient } from "../utils/redis.js";
 import { publishToTopic } from "../producer.js";
 
@@ -34,15 +36,18 @@ export function setupSocket(io: Server) {
             }
 
             // Fetch user info to attach to socket
-            const users = await sql`
-        SELECT user_id, name, email, role FROM users WHERE user_id = ${decoded.userId}
-      `;
+            const usersResult = await db.select({
+                user_id: users.userId,
+                name: users.name,
+                email: users.email,
+                role: users.role
+            }).from(users).where(eq(users.userId, decoded.userId));
 
-            if (users.length === 0) {
+            if (usersResult.length === 0) {
                 return next(new Error("User not found"));
             }
 
-            const user = users[0];
+            const user = usersResult[0];
             socket.data.userId = user.user_id;
             socket.data.userName = user.name;
             socket.data.userEmail = user.email;
@@ -78,11 +83,15 @@ export function setupSocket(io: Server) {
                 const { conversationId } = data;
 
                 // Verify user is part of this conversation
-                const [conversation] = await sql`
-          SELECT conversation_id FROM conversations 
-          WHERE conversation_id = ${conversationId} 
-          AND (applicant_id = ${userId} OR recruiter_id = ${userId})
-        `;
+                const conversationsResult = await db.select({
+                    conversation_id: conversations.conversationId
+                }).from(conversations).where(
+                    and(
+                        eq(conversations.conversationId, conversationId),
+                        or(eq(conversations.applicantId, userId), eq(conversations.recruiterId, userId))
+                    )
+                );
+                const conversation = conversationsResult[0];
 
                 if (!conversation) {
                     socket.emit("error", { message: "Not authorized for this conversation" });
@@ -115,12 +124,18 @@ export function setupSocket(io: Server) {
                     }
 
                     // Verify user is part of this conversation
-                    const [conversation] = await sql`
-            SELECT conversation_id, applicant_id, recruiter_id, job_id 
-            FROM conversations 
-            WHERE conversation_id = ${conversationId} 
-            AND (applicant_id = ${userId} OR recruiter_id = ${userId})
-          `;
+                    const conversationsResult = await db.select({
+                        conversation_id: conversations.conversationId,
+                        applicant_id: conversations.applicantId,
+                        recruiter_id: conversations.recruiterId,
+                        job_id: conversations.jobId
+                    }).from(conversations).where(
+                        and(
+                            eq(conversations.conversationId, conversationId),
+                            or(eq(conversations.applicantId, userId), eq(conversations.recruiterId, userId))
+                        )
+                    );
+                    const conversation = conversationsResult[0];
 
                     if (!conversation) {
                         socket.emit("error", { message: "Not authorized" });
@@ -128,23 +143,22 @@ export function setupSocket(io: Server) {
                     }
 
                     // Save message to database
-                    const [message] = await sql`
-            INSERT INTO messages (conversation_id, sender_id, content, message_type)
-            VALUES (${conversationId}, ${userId}, ${content.trim()}, ${type})
-            RETURNING message_id, conversation_id, sender_id, content, message_type, is_read, created_at
-          `;
+                    const messagesResult = await db.insert(messages).values({
+                        conversationId,
+                        senderId: userId,
+                        content: content.trim(),
+                        messageType: type as "text" | "file" | "image"
+                    }).returning();
+                    const message = messagesResult[0];
 
                     // Update conversation's last_message_at
-                    await sql`
-            UPDATE conversations SET last_message_at = NOW() 
-            WHERE conversation_id = ${conversationId}
-          `;
+                    await db.update(conversations).set({ lastMessageAt: new Date() }).where(eq(conversations.conversationId, conversationId));
 
                     // Attach sender info to the message
                     const messageWithSender = {
                         ...message,
-                        sender_name: socket.data.userName,
-                        sender_pic: null, // Could be fetched if needed
+                        senderName: socket.data.userName,
+                        senderPic: null, // Could be fetched if needed
                     };
 
                     // Broadcast to everyone in the conversation room (including sender for confirmation)
@@ -172,14 +186,17 @@ export function setupSocket(io: Server) {
 
                     if (!isOnline) {
                         // Get recipient's email
-                        const [recipient] = await sql`
-              SELECT email, name FROM users WHERE user_id = ${recipientId}
-            `;
+                        const recipientsResult = await db.select({
+                            email: users.email,
+                            name: users.name
+                        }).from(users).where(eq(users.userId, recipientId));
+                        const recipient = recipientsResult[0];
 
                         if (recipient) {
-                            const [job] = await sql`
-                SELECT title FROM jobs WHERE job_id = ${conversation.job_id}
-              `;
+                            const jobsResult = await db.select({
+                                title: jobs.title
+                            }).from(jobs).where(eq(jobs.jobId, conversation.job_id));
+                            const job = jobsResult[0];
 
                             await publishToTopic("send-mail", {
                                 to: recipient.email,
@@ -229,12 +246,13 @@ export function setupSocket(io: Server) {
             try {
                 const { conversationId } = data;
 
-                await sql`
-          UPDATE messages SET is_read = true 
-          WHERE conversation_id = ${conversationId} 
-          AND sender_id != ${userId} 
-          AND is_read = false
-        `;
+                await db.update(messages).set({ isRead: true }).where(
+                    and(
+                        eq(messages.conversationId, conversationId),
+                        ne(messages.senderId, userId),
+                        eq(messages.isRead, false)
+                    )
+                );
 
                 // Notify the other user that their messages were read
                 socket.to(`conversation:${conversationId}`).emit("messages-read", {

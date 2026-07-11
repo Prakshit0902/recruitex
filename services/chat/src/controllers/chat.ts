@@ -1,5 +1,7 @@
 import { AuthenticatedRequest } from "../middlewares/auth.js";
-import { sql } from "../utils/db.js";
+import { db } from "@app/db/client";
+import { conversations, messages, jobs, company, users, applications } from "@app/db/schema";
+import { eq, and, or, sql, desc, aliasedTable } from "drizzle-orm";
 import ErrorHandler from "../utils/errorHandler.js";
 import { TryCatch } from "../utils/TryCatch.js";
 
@@ -12,43 +14,47 @@ export const getConversations = TryCatch(
             throw new ErrorHandler(401, "Authentication required");
         }
 
-        const conversations = await sql`
-      SELECT 
-        c.conversation_id,
-        c.application_id,
-        c.job_id,
-        c.applicant_id,
-        c.recruiter_id,
-        c.last_message_at,
-        c.created_at,
-        j.title AS job_title,
-        comp.name AS company_name,
-        comp.logo AS company_logo,
-        applicant_user.name AS applicant_name,
-        applicant_user.profile_pic AS applicant_pic,
-        recruiter_user.name AS recruiter_name,
-        recruiter_user.profile_pic AS recruiter_pic,
-        (
-          SELECT COUNT(*)::int FROM messages m 
-          WHERE m.conversation_id = c.conversation_id 
-          AND m.sender_id != ${user.user_id} 
-          AND m.is_read = false
-        ) AS unread_count,
-        (
-          SELECT content FROM messages m 
-          WHERE m.conversation_id = c.conversation_id 
-          ORDER BY m.created_at DESC LIMIT 1
-        ) AS last_message
-      FROM conversations c
-      JOIN jobs j ON c.job_id = j.job_id
-      JOIN company comp ON j.company_id = comp.company_id
-      JOIN users applicant_user ON c.applicant_id = applicant_user.user_id
-      JOIN users recruiter_user ON c.recruiter_id = recruiter_user.user_id
-      WHERE c.applicant_id = ${user.user_id} OR c.recruiter_id = ${user.user_id}
-      ORDER BY c.last_message_at DESC NULLS LAST
-    `;
+        const applicant_user = aliasedTable(users, 'applicant_user');
+        const recruiter_user = aliasedTable(users, 'recruiter_user');
 
-        res.json(conversations);
+        const conversationsResult = await db.select({
+            conversationId: conversations.conversationId,
+            applicationId: conversations.applicationId,
+            jobId: conversations.jobId,
+            applicantId: conversations.applicantId,
+            recruiterId: conversations.recruiterId,
+            lastMessageAt: conversations.lastMessageAt,
+            createdAt: conversations.createdAt,
+            jobTitle: jobs.title,
+            companyName: company.name,
+            companyLogo: company.logo,
+            applicantName: applicant_user.name,
+            applicantPic: applicant_user.profilePic,
+            recruiterName: recruiter_user.name,
+            recruiterPic: recruiter_user.profilePic,
+            unreadCount: sql<number>`(
+                SELECT COUNT(*)::int FROM messages m 
+                WHERE m.conversation_id = ${conversations.conversationId} 
+                AND m.sender_id != ${user.user_id} 
+                AND m.is_read = false
+            )`.as('unread_count'),
+            lastMessage: sql<string>`(
+                SELECT content FROM messages m 
+                WHERE m.conversation_id = ${conversations.conversationId} 
+                ORDER BY m.created_at DESC LIMIT 1
+            )`.as('last_message')
+        })
+        .from(conversations)
+        .innerJoin(jobs, eq(conversations.jobId, jobs.jobId))
+        .innerJoin(company, eq(jobs.companyId, company.companyId))
+        .innerJoin(applicant_user, eq(conversations.applicantId, applicant_user.userId))
+        .innerJoin(recruiter_user, eq(conversations.recruiterId, recruiter_user.userId))
+        .where(
+            or(eq(conversations.applicantId, user.user_id), eq(conversations.recruiterId, user.user_id))
+        )
+        .orderBy(sql`${conversations.lastMessageAt} DESC NULLS LAST`);
+
+        res.json(conversationsResult);
     }
 );
 
@@ -67,11 +73,15 @@ export const getMessages = TryCatch(
         const offset = (page - 1) * limit;
 
         // Verify the user is part of this conversation
-        const [conversation] = await sql`
-      SELECT conversation_id FROM conversations 
-      WHERE conversation_id = ${conversationId} 
-      AND (applicant_id = ${user.user_id} OR recruiter_id = ${user.user_id})
-    `;
+        const conversationResult = await db.select({
+            conversation_id: conversations.conversationId
+        }).from(conversations).where(
+            and(
+                eq(conversations.conversationId, Number(conversationId)),
+                or(eq(conversations.applicantId, user.user_id), eq(conversations.recruiterId, user.user_id))
+            )
+        );
+        const conversation = conversationResult[0];
 
         if (!conversation) {
             throw new ErrorHandler(
@@ -80,31 +90,31 @@ export const getMessages = TryCatch(
             );
         }
 
-        const messages = await sql`
-      SELECT 
-        m.message_id,
-        m.conversation_id,
-        m.sender_id,
-        m.content,
-        m.message_type,
-        m.is_read,
-        m.created_at,
-        u.name AS sender_name,
-        u.profile_pic AS sender_pic
-      FROM messages m
-      JOIN users u ON m.sender_id = u.user_id
-      WHERE m.conversation_id = ${conversationId}
-      ORDER BY m.created_at ASC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+        const messagesResult = await db.select({
+            messageId: messages.messageId,
+            conversationId: messages.conversationId,
+            senderId: messages.senderId,
+            content: messages.content,
+            messageType: messages.messageType,
+            isRead: messages.isRead,
+            createdAt: messages.createdAt,
+            senderName: users.name,
+            senderPic: users.profilePic
+        })
+        .from(messages)
+        .innerJoin(users, eq(messages.senderId, users.userId))
+        .where(eq(messages.conversationId, Number(conversationId)))
+        .orderBy(messages.createdAt)
+        .limit(limit)
+        .offset(offset);
 
-        const [{ total }] = await sql`
-      SELECT COUNT(*)::int AS total FROM messages 
-      WHERE conversation_id = ${conversationId}
-    `;
+        const countResult = await db.select({
+            total: sql<number>`COUNT(*)::int`
+        }).from(messages).where(eq(messages.conversationId, Number(conversationId)));
+        const total = countResult[0].total;
 
         res.json({
-            messages,
+            messages: messagesResult,
             page,
             limit,
             total,
@@ -128,13 +138,16 @@ export const createConversation = TryCatch(
             throw new ErrorHandler(400, "application_id is required");
         }
 
-        const [application] = await sql`
-      SELECT a.application_id, a.job_id, a.applicant_id, 
-             j.posted_by_recruiter AS recruiter_id
-      FROM applications a
-      JOIN jobs j ON a.job_id = j.job_id
-      WHERE a.application_id = ${application_id}
-    `;
+        const applicationsResult = await db.select({
+            application_id: applications.applicationId,
+            job_id: applications.jobId,
+            applicant_id: applications.applicantId,
+            recruiter_id: jobs.postedByRecruiter
+        })
+        .from(applications)
+        .innerJoin(jobs, eq(applications.jobId, jobs.jobId))
+        .where(eq(applications.applicationId, application_id));
+        const application = applicationsResult[0];
 
         if (!application) {
             throw new ErrorHandler(404, "Application not found");
@@ -152,28 +165,34 @@ export const createConversation = TryCatch(
         }
 
         // Check if conversation already exists for this application
-        const existingConversations = await sql`
-      SELECT * FROM conversations WHERE application_id = ${application_id}
-    `;
+        const existingConversations = await db.select().from(conversations).where(eq(conversations.applicationId, application_id));
 
         if (existingConversations.length > 0) {
             res.json({
                 message: "Conversation already exists",
-                conversation: existingConversations[0],
+                conversation: {
+                    ...existingConversations[0],
+                    conversation_id: existingConversations[0].conversationId
+                },
             });
             return;
         }
 
         // Create new conversation
-        const [newConversation] = await sql`
-      INSERT INTO conversations (application_id, applicant_id, recruiter_id, job_id)
-      VALUES (${application.application_id}, ${application.applicant_id}, ${application.recruiter_id}, ${application.job_id})
-      RETURNING *
-    `;
+        const newConversationsResult = await db.insert(conversations).values({
+            applicationId: application.application_id,
+            applicantId: application.applicant_id,
+            recruiterId: application.recruiter_id,
+            jobId: application.job_id
+        }).returning();
+        const newConversation = newConversationsResult[0];
 
         res.status(201).json({
             message: "Conversation created",
-            conversation: newConversation,
+            conversation: {
+                ...newConversation,
+                conversation_id: newConversation.conversationId
+            },
         });
     }
 );
@@ -190,11 +209,15 @@ export const markMessagesRead = TryCatch(
         const { conversationId } = req.params;
 
         // Verify user is part of this conversation
-        const [conversation] = await sql`
-      SELECT conversation_id FROM conversations 
-      WHERE conversation_id = ${conversationId} 
-      AND (applicant_id = ${user.user_id} OR recruiter_id = ${user.user_id})
-    `;
+        const conversationResult = await db.select({
+            conversation_id: conversations.conversationId
+        }).from(conversations).where(
+            and(
+                eq(conversations.conversationId, Number(conversationId)),
+                or(eq(conversations.applicantId, user.user_id), eq(conversations.recruiterId, user.user_id))
+            )
+        );
+        const conversation = conversationResult[0];
 
         if (!conversation) {
             throw new ErrorHandler(
@@ -204,12 +227,13 @@ export const markMessagesRead = TryCatch(
         }
 
         // Mark messages from the OTHER person as read
-        await sql`
-      UPDATE messages SET is_read = true 
-      WHERE conversation_id = ${conversationId} 
-      AND sender_id != ${user.user_id} 
-      AND is_read = false
-    `;
+        await db.update(messages).set({ isRead: true }).where(
+            and(
+                eq(messages.conversationId, Number(conversationId)),
+                sql`${messages.senderId} != ${user.user_id}`,
+                eq(messages.isRead, false)
+            )
+        );
 
         res.json({ message: "Messages marked as read" });
     }
@@ -224,14 +248,19 @@ export const getUnreadCount = TryCatch(
             throw new ErrorHandler(401, "Authentication required");
         }
 
-        const [result] = await sql`
-      SELECT COUNT(*)::int AS unread_count
-      FROM messages m
-      JOIN conversations c ON m.conversation_id = c.conversation_id
-      WHERE (c.applicant_id = ${user.user_id} OR c.recruiter_id = ${user.user_id})
-      AND m.sender_id != ${user.user_id}
-      AND m.is_read = false
-    `;
+        const countResult = await db.select({
+            unread_count: sql<number>`COUNT(*)::int`
+        })
+        .from(messages)
+        .innerJoin(conversations, eq(messages.conversationId, conversations.conversationId))
+        .where(
+            and(
+                or(eq(conversations.applicantId, user.user_id), eq(conversations.recruiterId, user.user_id)),
+                sql`${messages.senderId} != ${user.user_id}`,
+                eq(messages.isRead, false)
+            )
+        );
+        const result = countResult[0];
 
         res.json({ unread_count: result.unread_count });
     }

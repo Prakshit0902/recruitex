@@ -4,7 +4,7 @@ export const CreatePostSchema = z.object({
     title: z.string().min(5, "Title must be at least 5 characters"),
     slug: z.string().min(3).optional(), // If not provided, we generate it
     tags: z.array(z.string()).optional(),
-    cover_image: z.string().url().optional(),
+    coverImage: z.string().url().optional(),
     sections: z.array(
         z.object({
             id: z.string(),
