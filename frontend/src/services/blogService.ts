@@ -27,12 +27,12 @@ export interface Post {
     title: string;
     slug: string;
     description?: string;
-    author_id: number;
+    authorId: number;
     tags: string[];
-    cover_image?: string;
+    coverImage?: string;
     sections: Section[];
-    created_at: string;
-    updated_at: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export const BlogService = {
@@ -65,7 +65,7 @@ export const BlogService = {
     },
 
     getMyPosts: async (page = 1, limit = 10) => {
-        const response = await axios.get(`${API_URL}/mine`, {
+        const response = await axios.get(`${API_URL}/user/my-posts`, {
             ...getAuthHeaders(),
             params: { page, limit }
         });

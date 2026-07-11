@@ -47,10 +47,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!token) return;
 
         // Fetch initial unread count
-        axios.get(`${chat_service}/api/chat/unread`, {
+        axios.get(`${chat_service}/api/chat/unread-count`, {
             headers: { Authorization: `Bearer ${token}` },
         }).then(({ data }) => {
-            setUnreadCount((data as any).count || 0);
+            setUnreadCount((data as any).unread_count || 0);
         }).catch(() => { /* ignore */ });
 
         // Create socket connection with JWT auth

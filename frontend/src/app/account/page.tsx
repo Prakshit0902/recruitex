@@ -127,10 +127,6 @@ const AccountPage = () => {
         return <AppliedJobs applications={applications} />;
       case "analytics":
         return <Analytics />;
-      case "chats":
-        // Redirect to chat page
-        router.push("/chat");
-        return null;
       default:
         return <Info user={user} isYourAccount={true} />;
     }
@@ -169,7 +165,13 @@ const AccountPage = () => {
               {filteredItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    if (item.id === "chats") {
+                      router.push("/chat");
+                    } else {
+                      setActiveTab(item.id);
+                    }
+                  }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${sidebarCollapsed ? "justify-center" : ""
                     } ${activeTab === item.id
                       ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm"
