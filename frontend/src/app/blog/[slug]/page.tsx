@@ -47,17 +47,17 @@ export default function BlogPostPage() {
                 <div className="flex items-center justify-center gap-6 text-muted-foreground">
                     <div className="flex items-center gap-2">
                         <Calendar size={18} />
-                        <time>{new Date(post.created_at).toLocaleDateString()}</time>
+                        <time>{new Date(post.createdAt).toLocaleDateString()}</time>
                     </div>
                     {/* Add Author if available in API response */}
                 </div>
             </header>
 
             {/* Cover Image */}
-            {post.cover_image && (
-                <div className="relative w-full h-[400px] mb-12 rounded-xl overflow-hidden shadow-lg">
+            {post.coverImage && (
+                <div className="relative w-full h-[400px] rounded-xl overflow-hidden mb-12 shadow-lg">
                     <img
-                        src={post.cover_image}
+                        src={post.coverImage}
                         alt={post.title}
                         className="object-cover w-full h-full"
                     />

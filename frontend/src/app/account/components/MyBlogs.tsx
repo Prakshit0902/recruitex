@@ -102,9 +102,9 @@ export default function MyBlogs() {
                                     {posts.map((post) => (
                                         <TableRow key={post.id}>
                                             <TableCell>
-                                                {post.cover_image ? (
+                                                {post.coverImage ? (
                                                     <img
-                                                        src={post.cover_image}
+                                                        src={post.coverImage}
                                                         alt={post.title}
                                                         className="w-16 h-10 object-cover rounded"
                                                     />
@@ -120,7 +120,7 @@ export default function MyBlogs() {
                                                 </Link>
                                             </TableCell>
                                             <TableCell>
-                                                {new Date(post.created_at).toLocaleDateString()}
+                                                {new Date(post.createdAt).toLocaleDateString()}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">

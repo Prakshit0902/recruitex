@@ -75,7 +75,7 @@ export default function ManageBlogsPage() {
                                         </Link>
                                     </td>
                                     <td className="p-4 text-sm">
-                                        {new Date(post.created_at).toLocaleDateString()}
+                                        {new Date(post.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="p-4 text-right flex justify-end gap-2">
                                         <button

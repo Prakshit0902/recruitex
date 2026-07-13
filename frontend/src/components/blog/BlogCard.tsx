@@ -10,10 +10,10 @@ export function BlogCard({ post }: { post: Post }) {
     return (
         <Link href={`/blog/${post.slug || post.id}`} className="group block h-full">
             <article className="flex flex-col h-full overflow-hidden border rounded-lg shadow-sm hover:shadow-md transition-shadow bg-card">
-                {post.cover_image && (
+                {post.coverImage && (
                     <div className="relative h-48 w-full overflow-hidden">
                         <img
-                            src={post.cover_image}
+                            src={post.coverImage}
                             alt={post.title}
                             className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                         />
@@ -35,8 +35,8 @@ export function BlogCard({ post }: { post: Post }) {
                     </h3>
                     <div className="mt-auto flex items-center text-sm text-muted-foreground">
                         <Calendar className="mr-1 h-3 w-3" />
-                        <time dateTime={post.created_at}>
-                            {new Date(post.created_at).toLocaleDateString()}
+                        <time dateTime={post.createdAt}>
+                            {new Date(post.createdAt).toLocaleDateString()}
                         </time>
                     </div>
                 </div>
