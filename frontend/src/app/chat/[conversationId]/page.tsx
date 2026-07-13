@@ -12,7 +12,7 @@ import { ArrowLeft, Send, Briefcase, Building2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const chat_service =
-    process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:5001";
+    process.env.NEXT_PUBLIC_CHAT_URL || "http://localhost:5007";
 
 const ChatConversationPage = () => {
     const params = useParams();
@@ -65,7 +65,7 @@ const ChatConversationPage = () => {
 
                 // Mark messages as read
                 await axios.put(
-                    `${chat_service}/api/chat/conversations/${conversationId}/read`,
+                    `${chat_service}/api/chat/messages/read/${conversationId}`,
                     {},
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -148,7 +148,7 @@ const ChatConversationPage = () => {
                 setMessages((prev) =>
                     prev.map((m) => ({
                         ...m,
-                        is_read: true,
+                        isRead: true,
                     }))
                 );
             }
@@ -282,9 +282,9 @@ const ChatConversationPage = () => {
                 </Link>
 
                 <Avatar className="h-10 w-10 ring-2 ring-offset-1 ring-offset-background ring-blue-500/20">
-                    <AvatarImage src={otherPic || ""} alt={otherName || ""} />
-                    <AvatarFallback className="bg-blue-100 dark:bg-blue-900 text-blue-600 font-semibold">
-                        {otherName?.charAt(0).toUpperCase() || "?"}
+                    <AvatarImage src={otherPic || undefined} alt={otherName || ""} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                        {otherName?.charAt(0)?.toUpperCase() || "?"}
                     </AvatarFallback>
                 </Avatar>
 

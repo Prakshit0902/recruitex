@@ -49,7 +49,7 @@ interface CompanySection {
 }
 
 const chat_service =
-    process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:5001";
+    process.env.NEXT_PUBLIC_CHAT_URL || "http://localhost:5007";
 
 export default function Applicants() {
     const [companies, setCompanies] = useState<CompanySection[]>([]);

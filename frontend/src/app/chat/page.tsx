@@ -55,20 +55,20 @@ const ChatPage = () => {
             setConversations((prev) => {
                 // Move the updated conversation to the top and bump its unread count
                 const updated = prev.map((conv) => {
-                    if (conv.conversation_id !== data.conversationId) return conv;
+                    if (conv.conversationId !== data.conversationId) return conv;
                     return {
                         ...conv,
-                        unread_count: conv.unread_count + 1,
-                        last_message: data.message.content,
-                        last_message_at: data.message.created_at,
+                        unreadCount: conv.unreadCount + 1,
+                        lastMessage: data.message.content,
+                        lastMessageAt: data.message.createdAt,
                     };
                 });
 
                 // Sort so conversations with newest messages appear first
                 return [...updated].sort(
                     (a, b) =>
-                        new Date(b.last_message_at).getTime() -
-                        new Date(a.last_message_at).getTime()
+                        new Date(b.lastMessageAt).getTime() -
+                        new Date(a.lastMessageAt).getTime()
                 );
             });
         };
@@ -98,13 +98,13 @@ const ChatPage = () => {
     const filteredConversations = conversations.filter((conv) => {
         const searchLower = searchQuery.toLowerCase();
         const otherName =
-            user?.user_id === conv.applicant_id
-                ? conv.recruiter_name
-                : conv.applicant_name;
+            user?.userId === conv.applicantId
+                ? conv.recruiterName
+                : conv.applicantName;
         return (
-            otherName.toLowerCase().includes(searchLower) ||
-            conv.job_title.toLowerCase().includes(searchLower) ||
-            conv.company_name.toLowerCase().includes(searchLower)
+            otherName?.toLowerCase().includes(searchLower) ||
+            conv.jobTitle?.toLowerCase().includes(searchLower) ||
+            conv.companyName?.toLowerCase().includes(searchLower)
         );
     });
 
@@ -182,27 +182,27 @@ const ChatPage = () => {
             ) : (
                 <div className="space-y-2">
                     {filteredConversations.map((conv) => {
-                        const isApplicant = user?.user_id === conv.applicant_id;
+                        const isApplicant = user?.userId === conv.applicantId;
                         const otherName = isApplicant
-                            ? conv.recruiter_name
-                            : conv.applicant_name;
+                            ? conv.recruiterName
+                            : conv.applicantName;
                         const otherPic = isApplicant
-                            ? conv.recruiter_pic
-                            : conv.applicant_pic;
+                            ? conv.recruiterPic
+                            : conv.applicantPic;
 
                         return (
                             <Link
-                                key={conv.conversation_id}
-                                href={`/chat/${conv.conversation_id}`}
+                                key={conv.conversationId}
+                                href={`/chat/${conv.conversationId}`}
                             >
                                 <div
-                                    className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all hover:bg-accent/50 hover:shadow-sm ${conv.unread_count > 0
+                                    className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all hover:bg-accent/50 hover:shadow-sm ${conv.unreadCount > 0
                                         ? "bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800"
                                         : ""
                                         }`}
                                 >
                                     <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-offset-background ring-blue-500/20">
-                                        <AvatarImage src={otherPic || ""} alt={otherName} />
+                                        <AvatarImage src={otherPic || undefined} alt={otherName} />
                                         <AvatarFallback className="bg-blue-100 dark:bg-blue-900 text-blue-600 font-semibold">
                                             {otherName.charAt(0).toUpperCase()}
                                         </AvatarFallback>
@@ -211,32 +211,32 @@ const ChatPage = () => {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between">
                                             <h3
-                                                className={`font-semibold truncate ${conv.unread_count > 0 ? "text-foreground" : ""
+                                                className={`font-semibold truncate ${conv.unreadCount > 0 ? "text-foreground" : ""
                                                     }`}
                                             >
                                                 {otherName}
                                             </h3>
                                             <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                                                {conv.last_message_at
-                                                    ? formatTime(conv.last_message_at)
+                                                {conv.lastMessageAt
+                                                    ? formatTime(conv.lastMessageAt)
                                                     : ""}
                                             </span>
                                         </div>
                                         <p className="text-sm text-muted-foreground truncate">
-                                            {conv.job_title} • {conv.company_name}
+                                            {conv.jobTitle} • {conv.companyName}
                                         </p>
                                         <div className="flex items-center justify-between mt-1">
                                             <p
-                                                className={`text-sm truncate ${conv.unread_count > 0
+                                                className={`text-sm truncate ${conv.unreadCount > 0
                                                     ? "font-medium text-foreground"
                                                     : "text-muted-foreground"
                                                     }`}
                                             >
-                                                {conv.last_message || "No messages yet"}
+                                                {conv.lastMessage || "No messages yet"}
                                             </p>
-                                            {conv.unread_count > 0 && (
+                                            {conv.unreadCount > 0 && (
                                                 <span className="ml-2 bg-blue-500 text-white text-xs rounded-full h-5 min-w-[20px] px-1.5 flex items-center justify-center font-bold">
-                                                    {conv.unread_count}
+                                                    {conv.unreadCount}
                                                 </span>
                                             )}
                                         </div>

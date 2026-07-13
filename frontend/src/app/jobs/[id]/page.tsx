@@ -25,7 +25,7 @@ import RecruiterPipeline from "@/components/recruiter-pipeline";
 import QuizBuilder from "@/components/quiz-builder";
 
 const chat_service =
-  process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:5001";
+  process.env.NEXT_PUBLIC_CHAT_URL || "http://localhost:5007";
 
 const JobPage = () => {
   const { id } = useParams();
