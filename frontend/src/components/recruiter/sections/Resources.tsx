@@ -102,10 +102,10 @@ const Resources = () => {
                         {blogs.map((blog) => (
                             <BlogCard
                                 key={blog.id}
-                                image={blog.cover_image || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=300&fit=crop&crop=center"}
+                                image={blog.coverImage || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=300&fit=crop&crop=center"}
                                 category={blog.tags?.[0] || "Blog"}
                                 title={blog.title}
-                                date={new Date(blog.created_at).toLocaleDateString("en-US", {
+                                date={new Date(blog.createdAt).toLocaleDateString("en-US", {
                                     month: "short",
                                     day: "2-digit",
                                     year: "numeric",

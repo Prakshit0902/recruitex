@@ -80,17 +80,17 @@ const JobSeekerLandingPage = () => {
     const [email, setEmail] = useState("");
 
     interface Job {
-        job_id: number;
+        jobId: number;
         title: string;
         description: string;
         salary: string;
         location: string;
-        job_type: string;
+        jobType: string;
         role: string;
-        work_location: string;
-        company_name: string;
-        company_logo: string;
-        company_id: number;
+        workLocation: string;
+        companyName: string;
+        companyLogo: string;
+        companyId: number;
     }
 
     const [jobs, setJobs] = useState<Job[]>([]);
@@ -129,7 +129,7 @@ const JobSeekerLandingPage = () => {
                         >
                             Connect with top employers and discover opportunities that match
                             your skills. Whether you&apos;re a fresher or experienced
-                            professional, HireHeaven makes job hunting effortless.
+                            professional, RecruitEx makes job hunting effortless.
                         </p>
 
                         {/* Search bar */}
@@ -292,8 +292,8 @@ const JobSeekerLandingPage = () => {
                                     {/* Company logo + name */}
                                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                                         <img
-                                            src={job.company_logo}
-                                            alt={job.company_name}
+                                            src={job.companyLogo}
+                                            alt={job.companyName}
                                             style={{
                                                 width: 40,
                                                 height: 40,
@@ -302,7 +302,7 @@ const JobSeekerLandingPage = () => {
                                             }}
                                         />
                                         <span style={{ fontSize: 14, fontWeight: 500, color: "var(--jl-text-muted)" }}>
-                                            {job.company_name}
+                                            {job.companyName}
                                         </span>
                                     </div>
 
@@ -325,7 +325,7 @@ const JobSeekerLandingPage = () => {
                                             marginBottom: 12,
                                         }}
                                     >
-                                        {job.job_type}
+                                        {job.jobType}
                                     </span>
 
                                     {/* Description */}
@@ -351,7 +351,7 @@ const JobSeekerLandingPage = () => {
                                             <span>{job.location}</span>
                                         </div>
                                         <Link
-                                            href={`/jobs/${job.job_id}`}
+                                            href={`/jobs/${job.jobId}`}
                                             className="jl-job-apply-btn"
                                             style={{ textDecoration: "none" }}
                                         >
@@ -635,10 +635,10 @@ const JobSeekerLandingPage = () => {
                                     marginBottom: 12,
                                 }}
                             >
-                                Hire<span style={{ color: "#ef4444" }}>Heaven</span>
+                                Recruit<span style={{ color: "#ef4444" }}>Ex</span>
                             </p>
                             <p style={{ fontSize: 14, lineHeight: 1.7, opacity: 0.75 }}>
-                                HireHeaven is India&apos;s fastest-growing job portal connecting
+                                RecruitEx is India&apos;s fastest-growing job portal connecting
                                 talented professionals with leading companies. Find your dream
                                 job today.
                             </p>
@@ -727,7 +727,7 @@ const JobSeekerLandingPage = () => {
                             opacity: 0.6,
                         }}
                     >
-                        © {new Date().getFullYear()} HireHeaven. All rights reserved.
+                        © {new Date().getFullYear()} RecruitEx. All rights reserved.
                     </div>
                 </div>
             </footer>

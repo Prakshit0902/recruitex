@@ -44,7 +44,7 @@ export default function RecruiterPipeline({
         // Group applications by status
         const grouped: Record<string, Application[]> = {};
         STAGES.forEach((stage) => {
-            grouped[stage] = applications.filter((app) => app.status === stage).sort((a, b) => (b.overall_score || 0) - (a.overall_score || 0));
+            grouped[stage] = applications.filter((app) => app.status === stage).sort((a, b) => (b.overallScore || 0) - (a.overallScore || 0));
         });
         setColumns(grouped);
     }, [applications]);
@@ -113,8 +113,8 @@ export default function RecruiterPipeline({
                                 >
                                     {columns[stage]?.map((app, index) => (
                                         <Draggable
-                                            key={app.application_id.toString()}
-                                            draggableId={app.application_id.toString()}
+                                            key={app.applicationId.toString()}
+                                            draggableId={app.applicationId.toString()}
                                             index={index}
                                         >
                                             {(provided, snapshot) => (
@@ -122,6 +122,7 @@ export default function RecruiterPipeline({
                                                     ref={provided.innerRef}
                                                     {...provided.draggableProps}
                                                     {...provided.dragHandleProps}
+                                                    style={provided.draggableProps.style as React.CSSProperties}
                                                     className={`p-4 cursor-grab shadow-sm border-2 ${snapshot.isDragging ? "shadow-lg border-blue-400" : "hover:border-blue-200"
                                                         }`}
                                                 >
@@ -131,7 +132,7 @@ export default function RecruiterPipeline({
                                                                 <User size={14} className="text-blue-600" />
                                                             </div>
                                                             <div className="truncate">
-                                                                <p className="font-medium text-sm truncate">{app.applicant_email}</p>
+                                                                <p className="font-medium text-sm truncate">{app.applicantEmail}</p>
                                                             </div>
                                                         </div>
                                                         <Button variant="ghost" size="icon" className="h-6 w-6 -mt-1 -mr-1">
@@ -140,15 +141,15 @@ export default function RecruiterPipeline({
                                                     </div>
 
                                                     <div className="flex items-center gap-2 mt-4 mb-3">
-                                                        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold ${getScoreBadgeColor(app.overall_score)}`}>
-                                                            <Star size={12} className={app.overall_score ? "opacity-100" : "opacity-0"} />
-                                                            {app.overall_score ? `Score ${app.overall_score}` : "No Score"}
+                                                        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold ${getScoreBadgeColor(app.overallScore)}`}>
+                                                            <Star size={12} className={app.overallScore ? "opacity-100" : "opacity-0"} />
+                                                            {app.overallScore ? `Score ${app.overallScore}` : "No Score"}
                                                         </div>
                                                     </div>
 
                                                     <div className="flex gap-2 pt-3 border-t flex-wrap">
                                                         <Link
-                                                            href={`/account/${app.applicant_id}`}
+                                                            href={`/account/${app.applicantId}`}
                                                             target="_blank"
                                                             className="text-blue-500 hover:underline text-xs flex-1 text-center py-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
                                                         >
@@ -156,7 +157,7 @@ export default function RecruiterPipeline({
                                                         </Link>
 
                                                         <button
-                                                            onClick={() => setInterviewAppId(app.application_id)}
+                                                            onClick={() => setInterviewAppId(app.applicationId)}
                                                             className="text-xs flex items-center gap-1 px-2 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400 font-medium"
                                                         >
                                                             <Calendar size={12} />
@@ -164,8 +165,8 @@ export default function RecruiterPipeline({
                                                         </button>
 
                                                         <button
-                                                            onClick={() => onOpenChat(app.application_id)}
-                                                            disabled={chatOpenLoadingId === app.application_id}
+                                                            onClick={() => onOpenChat(app.applicationId)}
+                                                            disabled={chatOpenLoadingId === app.applicationId}
                                                             className="text-xs flex items-center gap-1 px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
                                                         >
                                                             <MessageSquare size={12} />
@@ -173,7 +174,7 @@ export default function RecruiterPipeline({
                                                         </button>
 
                                                         <Link
-                                                            href={`/resume-intelligence/${app.applicant_id}`}
+                                                            href={`/resume-intelligence/${app.applicantId}`}
                                                             target="_blank"
                                                             className="text-xs flex items-center gap-1 px-2 py-1 rounded bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-violet-600 dark:text-violet-400 hover:from-violet-500/30 hover:to-purple-500/30 font-medium border border-violet-500/20"
                                                         >

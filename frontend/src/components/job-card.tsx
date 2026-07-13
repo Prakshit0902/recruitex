@@ -52,7 +52,7 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
           <Link href={`/company/${job.companyId}`} className="shrink-0">
             <div className="w-14 h-14 rounded-xl border-2 overflow-hidden hover:scale-105 transition-transform bg-background">
               <img
-                src={job.company_logo}
+                src={job.companyLogo}
                 alt=""
                 className="w-full h-full object-cover"
               />

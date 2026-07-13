@@ -113,13 +113,13 @@ export default function ResumeIntelligence({
     // ── Fetch index status ──────────────────────────────────────────────
     useEffect(() => {
         fetchStatus();
-    }, [candidateUser.user_id]);
+    }, [candidateUser.userId]);
 
     async function fetchStatus() {
         setStatusLoading(true);
         try {
             const { data } = await axios.get<ResumeIndexStatus>(
-                `${utils_service}/api/utils/resume/status/${candidateUser.user_id}`,
+                `${utils_service}/api/utils/resume/status/${candidateUser.userId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setIndexStatus(data);
@@ -140,7 +140,7 @@ export default function ResumeIntelligence({
         try {
             await axios.post(
                 `${utils_service}/api/utils/resume/upload`,
-                { userId: candidateUser.user_id, resumeUrl: candidateUser.resume },
+                { userId: candidateUser.userId, resumeUrl: candidateUser.resume },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.success("Resume indexed successfully!");
@@ -172,7 +172,7 @@ export default function ResumeIntelligence({
                 : `${utils_service}/api/utils/resume/query`;
 
             const body: any = {
-                userId: candidateUser.user_id,
+                userId: candidateUser.userId,
                 question,
             };
 
@@ -375,14 +375,14 @@ export default function ResumeIntelligence({
                         )}
 
                         {/* Experience summary */}
-                        {structured?.experience_summary && (
+                        {structured?.experienceSummary && (
                             <Card className="p-4 border-2 bg-card/50">
                                 <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                                     <Briefcase className="h-4 w-4 text-emerald-400" />
                                     Experience
                                 </h3>
                                 <p className="text-xs text-muted-foreground leading-relaxed">
-                                    {structured.experience_summary}
+                                    {structured.experienceSummary}
                                 </p>
                             </Card>
                         )}
