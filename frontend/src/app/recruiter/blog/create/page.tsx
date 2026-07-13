@@ -30,17 +30,13 @@ export default function CreateBlogPage() {
 
         try {
             setUploading(true);
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onloadend = async () => {
-                const base64data = reader.result;
-                const { data } = await axios.post(`${utils_service}/api/utils/upload`, {
-                    buffer: base64data,
-                });
-                setCoverImage((data as any).url);
-                toast.success("Image uploaded successfully");
-                setUploading(false);
-            };
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const { data } = await axios.post(`${utils_service}/api/utils/upload`, formData);
+            setCoverImage((data as any).url);
+            toast.success("Image uploaded successfully");
+            setUploading(false);
         } catch (error) {
             console.error(error);
             toast.error("Failed to upload image");
@@ -63,15 +59,22 @@ export default function CreateBlogPage() {
             setIsSubmitting(true);
             await BlogService.createPost({
                 title,
-                cover_image: coverImage,
+                coverImage: coverImage || undefined,
                 tags,
                 sections,
             });
             toast.success("Blog post created successfully!");
             router.push("/account");
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Failed to create blog post");
+            const errorMsg = error.response?.data?.message || "Failed to create blog post";
+            const validationErrors = error.response?.data?.errors;
+            if (validationErrors) {
+                console.error("Validation details:", validationErrors);
+                toast.error(`${errorMsg} (Check console for details)`);
+            } else {
+                toast.error(errorMsg);
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -128,7 +131,7 @@ export default function CreateBlogPage() {
                         </div>
                         {coverImage && (
                             <div className="mt-4 relative h-48 w-full rounded-md overflow-hidden border">
-                                <img src={coverImage} alt="Cover" className="object-cover w-full h-full" />
+                                <img src={coverImage || undefined} alt="Cover" className="object-cover w-full h-full" />
                                 <button
                                     type="button"
                                     onClick={() => setCoverImage("")}

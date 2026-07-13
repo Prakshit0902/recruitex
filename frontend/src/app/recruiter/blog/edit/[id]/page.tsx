@@ -29,7 +29,7 @@ export default function EditBlogPage() {
                 const data = await BlogService.getPostBySlug(id as string) as any;
 
                 setTitle(data.title);
-                setCoverImage(data.cover_image || "");
+                setCoverImage(data.coverImage || "");
                 setTags(data.tags || []);
                 // Ensure sections is parsed if it comes as string, though typescript interface says Section[]
                 // Backend sends json, axios parses it.
@@ -92,7 +92,7 @@ export default function EditBlogPage() {
             setIsSubmitting(true);
             await BlogService.updatePost(Number(id), {
                 title,
-                cover_image: coverImage,
+                coverImage: coverImage,
                 tags,
                 sections,
             });
@@ -165,7 +165,7 @@ export default function EditBlogPage() {
                         </div>
                         {coverImage && (
                             <div className="mt-4 relative h-48 w-full rounded-md overflow-hidden border">
-                                <img src={coverImage} alt="Cover" className="object-cover w-full h-full" />
+                                <img src={coverImage || undefined} alt="Cover" className="object-cover w-full h-full" />
                                 <button
                                     type="button"
                                     onClick={() => setCoverImage("")}

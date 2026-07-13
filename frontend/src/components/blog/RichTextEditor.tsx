@@ -13,18 +13,20 @@ interface RichTextEditorProps {
     onChange: (content: string) => void;
 }
 
+const extensions = [
+    StarterKit,
+    Link.configure({
+        openOnClick: false,
+    }),
+    Image,
+];
+
 export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
 
     const editor = useEditor({
-        extensions: [
-            StarterKit,
-            Link.configure({
-                openOnClick: false,
-            }),
-            Image,
-        ],
+        extensions,
         content: content,
         onUpdate: ({ editor }) => {
             onChange(editor.getHTML());
@@ -51,16 +53,12 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
         try {
             setUploading(true);
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onloadend = async () => {
-                const base64data = reader.result;
-                const { data } = await axios.post(`${utils_service}/api/utils/upload`, {
-                    buffer: base64data,
-                });
-                editor.chain().focus().setImage({ src: (data as any).url }).run();
-                setUploading(false);
-            };
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const { data } = await axios.post(`${utils_service}/api/utils/upload`, formData);
+            editor.chain().focus().setImage({ src: (data as any).url }).run();
+            setUploading(false);
         } catch (error) {
             console.error(error);
             toast.error("Failed to upload image");
@@ -79,7 +77,11 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
             return;
         }
 
-        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        if (editor.isActive('link')) {
+            editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        } else {
+            editor.chain().focus().setLink({ href: url }).run();
+        }
     };
 
     return (
@@ -89,7 +91,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                     type="button"
                     onClick={() => editor.chain().focus().toggleBold().run()}
                     disabled={!editor.can().chain().focus().toggleBold().run()}
-                    className={`p-1 rounded ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}
+                    className={`p-1 rounded ${editor.isActive('bold') ? 'bg-accent text-accent-foreground' : ''}`}
                 >
                     <Bold size={18} />
                 </button>
@@ -97,25 +99,25 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                     type="button"
                     onClick={() => editor.chain().focus().toggleItalic().run()}
                     disabled={!editor.can().chain().focus().toggleItalic().run()}
-                    className={`p-1 rounded ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}
+                    className={`p-1 rounded ${editor.isActive('italic') ? 'bg-accent text-accent-foreground' : ''}`}
                 >
                     <Italic size={18} />
                 </button>
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleBulletList().run()}
-                    className={`p-1 rounded ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`}
+                    className={`p-1 rounded ${editor.isActive('bulletList') ? 'bg-accent text-accent-foreground' : ''}`}
                 >
                     <List size={18} />
                 </button>
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                    className={`p-1 rounded ${editor.isActive('orderedList') ? 'bg-gray-200' : ''}`}
+                    className={`p-1 rounded ${editor.isActive('orderedList') ? 'bg-accent text-accent-foreground' : ''}`}
                 >
                     <ListOrdered size={18} />
                 </button>
-                <button type="button" onClick={setLink} className={`p-1 rounded ${editor.isActive('link') ? 'bg-gray-200' : ''}`}>
+                <button type="button" onClick={setLink} className={`p-1 rounded ${editor.isActive('link') ? 'bg-accent text-accent-foreground' : ''}`}>
                     <LinkIcon size={18} />
                 </button>
                 <button type="button" onClick={triggerImageUpload} className="p-1 rounded" disabled={uploading}>
@@ -124,7 +126,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                    className={`p-1 rounded ${editor.isActive('codeBlock') ? 'bg-gray-200' : ''}`}
+                    className={`p-1 rounded ${editor.isActive('codeBlock') ? 'bg-accent text-accent-foreground' : ''}`}
                 >
                     <Code size={18} />
                 </button>
