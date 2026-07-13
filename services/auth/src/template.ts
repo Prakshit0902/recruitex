@@ -5,7 +5,7 @@ export const forgotPasswordTemplate = (resetLink: string) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reset Your Password - Recruitex</title>
+  <title>Reset Your Password - RecruitEx</title>
 
   <style>
     * {
@@ -284,12 +284,12 @@ export const forgotPasswordTemplate = (resetLink: string) => {
           <!-- Hero Section -->
           <tr>
             <td class="hero">
-              <div class="brand-pill">Recruitex</div>
+              <div class="brand-pill">RecruitEx</div>
               <div class="hero-icon">🔐</div>
 
               <h1>Reset Your Password</h1>
               <p>
-                We received a secure request to help you regain access to your Recruitex account.
+                We received a secure request to help you regain access to your RecruitEx account.
               </p>
             </td>
           </tr>
@@ -338,7 +338,7 @@ export const forgotPasswordTemplate = (resetLink: string) => {
 
               <p class="help-text">
                 If you did not request a password reset, you can safely ignore this email.
-                Your Recruitex account will remain secure.
+                Your RecruitEx account will remain secure.
               </p>
             </td>
           </tr>
@@ -346,14 +346,14 @@ export const forgotPasswordTemplate = (resetLink: string) => {
           <!-- Footer -->
           <tr>
             <td class="footer">
-              <p class="footer-brand">Recruitex</p>
+              <p class="footer-brand">RecruitEx</p>
 
               <p class="footer-text">
                 Helping companies and candidates connect smarter.
               </p>
 
               <p class="footer-text">
-                © 2025 Recruitex. All rights reserved.
+                © 2025 RecruitEx. All rights reserved.
               </p>
 
               <p class="footer-text">

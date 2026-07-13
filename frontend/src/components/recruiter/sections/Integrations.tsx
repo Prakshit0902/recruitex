@@ -80,7 +80,7 @@ const Integrations = () => {
                             Join to Help Businesses Grow
                         </h3>
                         <p className="rl-body" style={{ color: "var(--rl-text-muted)", marginBottom: 24 }}>
-                            Partner with HireHeaven to streamline your hiring, reduce time-to-fill,
+                            Partner with RecruitEx to streamline your hiring, reduce time-to-fill,
                             and connect with top-tier talent across India.
                         </p>
                         <button className="rl-btn-lime" style={{ padding: "12px 28px", fontSize: 15 }}>

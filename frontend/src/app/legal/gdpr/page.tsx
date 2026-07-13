@@ -1,8 +1,8 @@
 import React from "react";
 
 export const metadata = {
-    title: "GDPR Compliance - HireHeaven",
-    description: "HireHeaven GDPR Compliance - How we comply with the General Data Protection Regulation.",
+    title: "GDPR Compliance - RecruitEx",
+    description: "RecruitEx GDPR Compliance - How we comply with the General Data Protection Regulation.",
 };
 
 export default function GDPRPage() {
@@ -20,14 +20,14 @@ export default function GDPRPage() {
             <hr style={{ border: "none", borderTop: "1px solid #E5E7EB", marginBottom: 32 }} />
 
             <p style={paraStyle}>
-                HireHeaven is committed to complying with the General Data Protection Regulation (GDPR) and ensuring that
+                RecruitEx is committed to complying with the General Data Protection Regulation (GDPR) and ensuring that
                 all personal data is handled responsibly and transparently. This page outlines how we comply with GDPR
                 requirements and your rights under the regulation.
             </p>
 
             <h2 style={headingStyle}>1. Data Controller</h2>
             <p style={paraStyle}>
-                HireHeaven acts as the data controller for personal data collected through our platform. We determine the
+                RecruitEx acts as the data controller for personal data collected through our platform. We determine the
                 purposes and means of processing your personal data and are responsible for ensuring compliance with GDPR.
             </p>
 
@@ -104,7 +104,7 @@ export default function GDPRPage() {
             <p style={paraStyle}>
                 For any GDPR-related inquiries, data access requests, or to exercise your rights, please contact our
                 Data Protection Officer at{" "}
-                <a href="mailto:dpo@hireheaven.com" style={{ color: "#3B82F6" }}>dpo@hireheaven.com</a>.
+                <a href="mailto:dpo@recruitex.com" style={{ color: "#3B82F6" }}>dpo@recruitex.com</a>.
             </p>
 
             <h2 style={headingStyle}>9. Supervisory Authority</h2>

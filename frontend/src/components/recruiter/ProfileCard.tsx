@@ -11,7 +11,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ avatar, name, role, company }
     return (
         <div className="rl-card" style={{ padding: 24, textAlign: "center" }}>
             <img
-                src={avatar}
+                src={avatar || undefined}
                 alt={name}
                 style={{
                     width: 72,

@@ -46,9 +46,9 @@ const NavBar = () => {
             <Link href={"/"} className="flex items-center gap-1 group">
               <div className="text-2xl font-bold tracking-tight">
                 <span className="bg-linear-to-r from bg-blue-600 to-blue-800 bg-clip-text text-transparent">
-                  Hire
+                  Recruit
                 </span>
-                <span className="text-red-500">Heaven</span>
+                <span className="text-red-500">Ex</span>
               </div>
             </Link>
           </div>
@@ -81,7 +81,7 @@ const NavBar = () => {
                         <button className="flex items-center gap-2 hover:opacity-80 transition-opacity relative">
                           <Avatar className="h-9 w-9 ring-2 ring-offset-2 ring-offset-background ring-blue-500/20 cursor-pointer hover:ring-blue-500/40 transition-all">
                             <AvatarImage
-                              src={user ? (user.profilePic as string) : ""}
+                              src={user ? (user.profilePic as string) : undefined}
                               alt={user ? user.name : ""}
                             />
                             <AvatarFallback className="bg-blue-100 dark:bg-blue-900 text-blue-600">

@@ -15,7 +15,7 @@ const JobCard: React.FC<JobCardProps> = ({ logo, company, title, location, type,
         <div className="rl-card" style={{ padding: 24 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                 <img
-                    src={logo}
+                    src={logo || undefined}
                     alt={company}
                     style={{
                         width: 44,

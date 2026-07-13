@@ -35,7 +35,7 @@ export const startSendMailConsumer = async () => {
                     })
 
                     await transporter.sendMail({
-                        from : 'Recruitex <no-reply>@',
+                        from : 'RecruitEx <no-reply>@',
                         to,
                         subject,
                         html

@@ -24,7 +24,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, avatar, name, 
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <img
-                    src={avatar}
+                    src={avatar || undefined}
                     alt={name}
                     style={{
                         width: 40,

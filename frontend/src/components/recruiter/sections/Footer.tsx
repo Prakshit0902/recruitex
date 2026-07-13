@@ -49,8 +49,8 @@ const Footer = () => {
                     <div>
                         <div style={{ marginBottom: 16 }}>
                             <span style={{ fontSize: 22, fontWeight: 700 }}>
-                                <span style={{ color: "var(--rl-primary)" }}>Hire</span>
-                                <span style={{ color: "#EF4444" }}>Heaven</span>
+                                <span style={{ color: "var(--rl-primary)" }}>Recruit</span>
+                                <span style={{ color: "#EF4444" }}>Ex</span>
                             </span>
                         </div>
                         <p className="rl-small" style={{ color: "var(--rl-text-muted)", marginBottom: 20, maxWidth: 260 }}>
@@ -59,7 +59,7 @@ const Footer = () => {
                         </p>
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             <span className="rl-small" style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--rl-text-muted)" }}>
-                                <Mail size={14} /> contact@hireheaven.com
+                                <Mail size={14} /> contact@recruitex.com
                             </span>
                             <span className="rl-small" style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--rl-text-muted)" }}>
                                 <Phone size={14} /> +91 98765 43210
@@ -163,7 +163,7 @@ const Footer = () => {
                     }}
                 >
                     <p className="rl-small" style={{ color: "var(--rl-text-muted)" }}>
-                        © 2025 HireHeaven. All rights reserved.
+                        © 2025 RecruitEx. All rights reserved.
                     </p>
                 </div>
             </div>

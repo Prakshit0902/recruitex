@@ -6,7 +6,7 @@ import { AppProvider } from "@/context/AppContext";
 import { SocketProvider } from "@/context/SocketContext";
 
 export const metadata: Metadata = {
-  title: "HireHeaven - Find Your Dream Job",
+  title: "RecruitEx - Find Your Dream Job",
   description: "Connect with top employers and discover opportunities that match your skills.",
 };
 

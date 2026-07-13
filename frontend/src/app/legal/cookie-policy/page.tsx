@@ -1,8 +1,8 @@
 import React from "react";
 
 export const metadata = {
-    title: "Cookie Policy - HireHeaven",
-    description: "HireHeaven Cookie Policy - How we use cookies and similar technologies.",
+    title: "Cookie Policy - RecruitEx",
+    description: "RecruitEx Cookie Policy - How we use cookies and similar technologies.",
 };
 
 export default function CookiePolicyPage() {
@@ -20,7 +20,7 @@ export default function CookiePolicyPage() {
             <hr style={{ border: "none", borderTop: "1px solid #E5E7EB", marginBottom: 32 }} />
 
             <p style={paraStyle}>
-                This Cookie Policy explains how HireHeaven uses cookies and similar technologies to recognize you when you
+                This Cookie Policy explains how RecruitEx uses cookies and similar technologies to recognize you when you
                 visit our platform. It explains what these technologies are and why we use them, as well as your rights to
                 control our use of them.
             </p>
@@ -100,7 +100,7 @@ export default function CookiePolicyPage() {
             <h2 style={headingStyle}>6. Contact Us</h2>
             <p style={paraStyle}>
                 If you have questions about our use of cookies, please contact us at{" "}
-                <a href="mailto:contact@hireheaven.com" style={{ color: "#3B82F6" }}>contact@hireheaven.com</a>.
+                <a href="mailto:contact@recruitex.com" style={{ color: "#3B82F6" }}>contact@recruitex.com</a>.
             </p>
         </>
     );

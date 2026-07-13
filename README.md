@@ -1,1 +1,1 @@
-Recruitex : Get Hired
+RecruitEx : Get Hired

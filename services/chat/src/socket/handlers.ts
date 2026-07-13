@@ -200,7 +200,7 @@ export function setupSocket(io: Server) {
 
                             await publishToTopic("send-mail", {
                                 to: recipient.email,
-                                subject: `New message from ${socket.data.userName} - HireHeaven`,
+                                subject: `New message from ${socket.data.userName} - RecruitEx`,
                                 html: `
                   <div style="font-family: Arial, sans-serif; padding: 20px;">
                     <h2>You have a new message!</h2>

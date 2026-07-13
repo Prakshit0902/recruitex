@@ -1,8 +1,8 @@
 import React from "react";
 
 export const metadata = {
-    title: "Privacy Policy - HireHeaven",
-    description: "HireHeaven Privacy Policy - How we collect, use, and protect your personal data.",
+    title: "Privacy Policy - RecruitEx",
+    description: "RecruitEx Privacy Policy - How we collect, use, and protect your personal data.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
             <hr style={{ border: "none", borderTop: "1px solid #E5E7EB", marginBottom: 32 }} />
 
             <p style={paraStyle}>
-                At HireHeaven, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose,
+                At RecruitEx, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose,
                 and safeguard your information when you visit our platform and use our services.
             </p>
 
@@ -82,7 +82,7 @@ export default function PrivacyPolicyPage() {
             <h2 style={headingStyle}>7. Contact Us</h2>
             <p style={paraStyle}>
                 If you have questions about this Privacy Policy, please contact us at{" "}
-                <a href="mailto:contact@hireheaven.com" style={{ color: "#3B82F6" }}>contact@hireheaven.com</a>.
+                <a href="mailto:contact@recruitex.com" style={{ color: "#3B82F6" }}>contact@recruitex.com</a>.
             </p>
         </>
     );

@@ -1,8 +1,8 @@
 import React from "react";
 
 export const metadata = {
-    title: "Terms of Service - HireHeaven",
-    description: "HireHeaven Terms of Service - Rules and guidelines for using our platform.",
+    title: "Terms of Service - RecruitEx",
+    description: "RecruitEx Terms of Service - Rules and guidelines for using our platform.",
 };
 
 export default function TermsOfServicePage() {
@@ -20,13 +20,13 @@ export default function TermsOfServicePage() {
             <hr style={{ border: "none", borderTop: "1px solid #E5E7EB", marginBottom: 32 }} />
 
             <p style={paraStyle}>
-                Welcome to HireHeaven. By accessing or using our platform, you agree to be bound by these Terms of Service.
+                Welcome to RecruitEx. By accessing or using our platform, you agree to be bound by these Terms of Service.
                 Please read them carefully before using our services.
             </p>
 
             <h2 style={headingStyle}>1. Acceptance of Terms</h2>
             <p style={paraStyle}>
-                By creating an account or using HireHeaven, you acknowledge that you have read, understood, and agree to be
+                By creating an account or using RecruitEx, you acknowledge that you have read, understood, and agree to be
                 bound by these terms. If you do not agree, you must not use our platform.
             </p>
 
@@ -40,7 +40,7 @@ export default function TermsOfServicePage() {
             </ul>
 
             <h2 style={headingStyle}>3. Job Seekers</h2>
-            <p style={paraStyle}>As a job seeker on HireHeaven, you agree to:</p>
+            <p style={paraStyle}>As a job seeker on RecruitEx, you agree to:</p>
             <ul style={{ ...paraStyle, paddingLeft: 24 }}>
                 <li style={{ marginBottom: 8 }}>Provide truthful and accurate information in your profile, resume, and applications.</li>
                 <li style={{ marginBottom: 8 }}>Not misrepresent your qualifications, experience, or skills.</li>
@@ -49,7 +49,7 @@ export default function TermsOfServicePage() {
             </ul>
 
             <h2 style={headingStyle}>4. Recruiters & Employers</h2>
-            <p style={paraStyle}>As a recruiter or employer on HireHeaven, you agree to:</p>
+            <p style={paraStyle}>As a recruiter or employer on RecruitEx, you agree to:</p>
             <ul style={{ ...paraStyle, paddingLeft: 24 }}>
                 <li style={{ marginBottom: 8 }}>Post only genuine job opportunities with accurate descriptions.</li>
                 <li style={{ marginBottom: 8 }}>Not use applicant data for purposes other than recruitment.</li>
@@ -71,9 +71,9 @@ export default function TermsOfServicePage() {
 
             <h2 style={headingStyle}>6. Content & Intellectual Property</h2>
             <p style={paraStyle}>
-                You retain ownership of content you post on HireHeaven. By posting content, you grant us a non-exclusive,
+                You retain ownership of content you post on RecruitEx. By posting content, you grant us a non-exclusive,
                 worldwide license to use, display, and distribute your content in connection with operating the platform.
-                All HireHeaven branding, logos, and platform design are our intellectual property.
+                All RecruitEx branding, logos, and platform design are our intellectual property.
             </p>
 
             <h2 style={headingStyle}>7. Subscription & Payments</h2>
@@ -84,7 +84,7 @@ export default function TermsOfServicePage() {
 
             <h2 style={headingStyle}>8. Limitation of Liability</h2>
             <p style={paraStyle}>
-                HireHeaven is provided &quot;as is&quot; without warranties of any kind. We do not guarantee employment outcomes,
+                RecruitEx is provided &quot;as is&quot; without warranties of any kind. We do not guarantee employment outcomes,
                 the accuracy of job listings, or the conduct of other users. We shall not be liable for any indirect,
                 incidental, or consequential damages arising from your use of the platform.
             </p>
@@ -104,7 +104,7 @@ export default function TermsOfServicePage() {
             <h2 style={headingStyle}>11. Contact Us</h2>
             <p style={paraStyle}>
                 For questions about these Terms of Service, contact us at{" "}
-                <a href="mailto:contact@hireheaven.com" style={{ color: "#3B82F6" }}>contact@hireheaven.com</a>.
+                <a href="mailto:contact@recruitex.com" style={{ color: "#3B82F6" }}>contact@recruitex.com</a>.
             </p>
         </>
     );

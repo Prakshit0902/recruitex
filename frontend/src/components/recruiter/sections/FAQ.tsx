@@ -4,8 +4,8 @@ import { ChevronDown } from "lucide-react";
 
 const faqs = [
     {
-        q: "How does HireHeaven help me find the right candidates?",
-        a: "HireHeaven uses smart matching algorithms to connect your job postings with the most relevant candidates based on skills, experience, and preferences. Our platform also provides advanced filtering and search capabilities to help you narrow down your ideal candidates quickly.",
+        q: "How does RecruitEx help me find the right candidates?",
+        a: "RecruitEx uses smart matching algorithms to connect your job postings with the most relevant candidates based on skills, experience, and preferences. Our platform also provides advanced filtering and search capabilities to help you narrow down your ideal candidates quickly.",
     },
     {
         q: "Is there a free plan available for recruiters?",
@@ -16,8 +16,8 @@ const faqs = [
         a: "You can set up your company profile and post your first job in under 15 minutes. Our guided onboarding process walks you through creating your profile, adding team members, and configuring your posting preferences step by step.",
     },
     {
-        q: "Can I integrate HireHeaven with my existing HR tools?",
-        a: "Absolutely. HireHeaven integrates seamlessly with popular tools like Slack, Google Meet, LinkedIn, Jira, and more. We also provide REST APIs for custom integrations with your existing ATS or HRIS systems.",
+        q: "Can I integrate RecruitEx with my existing HR tools?",
+        a: "Absolutely. RecruitEx integrates seamlessly with popular tools like Slack, Google Meet, LinkedIn, Jira, and more. We also provide REST APIs for custom integrations with your existing ATS or HRIS systems.",
     },
     {
         q: "What kind of support do you offer?",
@@ -36,7 +36,7 @@ const FAQ = () => {
                         Frequently Asked Questions
                     </h2>
                     <p className="rl-body" style={{ color: "var(--rl-text-muted)" }}>
-                        Everything you need to know about HireHeaven
+                        Everything you need to know about RecruitEx
                     </p>
                 </div>
 

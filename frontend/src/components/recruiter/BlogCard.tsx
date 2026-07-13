@@ -14,7 +14,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ image, category, title, date, slug 
         <div className="rl-card" style={{ overflow: "hidden", cursor: slug ? "pointer" : "default" }}>
             <div style={{ overflow: "hidden", height: 180 }}>
                 <img
-                    src={image}
+                    src={image || undefined}
                     alt={title}
                     style={{
                         width: "100%",

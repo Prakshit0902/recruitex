@@ -49,7 +49,7 @@ const FinalCTA = () => {
                     Ready to Organize your Hiring?
                 </h2>
                 <p className="rl-body" style={{ color: "rgba(255,255,255,0.7)", marginBottom: 32 }}>
-                    Join thousands of companies that trust HireHeaven to build their dream teams.
+                    Join thousands of companies that trust RecruitEx to build their dream teams.
                 </p>
                 <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
                     <Link href="/register">

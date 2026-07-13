@@ -39,7 +39,7 @@ const RecruiterHero = () => {
                     >
                         Build & Ship a Job Board{" "}
                         <span style={{ color: "var(--rl-accent)" }}>Fast</span> with{" "}
-                        <span style={{ color: "var(--rl-accent)" }}>HireHeaven</span>
+                        <span style={{ color: "var(--rl-accent)" }}>RecruitEx</span>
                     </h1>
                     <p
                         className="rl-body"
