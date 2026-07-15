@@ -50,7 +50,6 @@
 //     // "noPropertyAccessFromIndexSignature": true,
 //     // Recommended Options
 //     "strict": true,
-    "noImplicitAny": false,
 //     "jsx": "react-jsx",
 //     "verbatimModuleSyntax": true,
 //     "isolatedModules": true,

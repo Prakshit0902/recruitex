@@ -79,7 +79,7 @@ export const getAllPosts = async (req: Request, res: Response): Promise<void> =>
         let posts;
         let total;
         
-        let conditions = [];
+        let conditions: any[] = [];
         if (search) conditions.push(ilike(blogPosts.title, `%${search}%`));
         if (tag) conditions.push(sql`${tag}::text = ANY(${blogPosts.tags})`);
         
