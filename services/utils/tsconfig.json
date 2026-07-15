@@ -7,6 +7,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "noImplicitAny": false,
     "skipLibCheck": true
   },
   "include": [
@@ -49,6 +50,7 @@
 //     // "noPropertyAccessFromIndexSignature": true,
 //     // Recommended Options
 //     "strict": true,
+    "noImplicitAny": false,
 //     "jsx": "react-jsx",
 //     "verbatimModuleSyntax": true,
 //     "isolatedModules": true,
