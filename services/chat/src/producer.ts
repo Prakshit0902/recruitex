@@ -9,7 +9,13 @@ export const connectKafka = async () => {
     try {
         const kafka = new Kafka({
             clientId: "chat-service",
-            brokers: [process.env.KAFKA_BROKER || "localhost:9092"],
+            brokers: [process.env.KAFKA_BROKER_URL || process.env.KAFKA_BROKER || "localhost:9092"],
+            ssl: true,
+            sasl: {
+                mechanism: 'plain',
+                username: process.env.KAFKA_USERNAME || '',
+                password: process.env.KAFKA_PASSWORD || '',
+            },
             retry: {
                 initialRetryTime: 300,
                 retries: 2

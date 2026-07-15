@@ -6,8 +6,14 @@ let admin : Admin
 export const connectKafka = async () => {
     try {
         const kafka = new Kafka({
-            clientId : 'auth-service',
-            brokers : [process.env.KAFKA_BROKER || 'localhost:9092'],
+            clientId: 'auth-service',
+            brokers: [process.env.KAFKA_BROKER_URL!],
+            ssl: true,
+            sasl: {
+                mechanism: 'plain',
+                username: process.env.KAFKA_USERNAME!,
+                password: process.env.KAFKA_PASSWORD!,
+            },
             retry: {
                 initialRetryTime: 300,
                 retries: 2
