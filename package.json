@@ -22,7 +22,7 @@
     "dev:chat": "npm run dev -w chat",
     "dev:payment": "npm run dev -w payment",
     "dev": "concurrently -n db,auth,user,job,utils,ai,blog,chat,payment -c red,blue,green,yellow,magenta,cyan,white,gray,black \"npm run dev -w @app/db\" \"npm run dev -w auth\" \"npm run dev -w user\" \"npm run dev -w job\" \"npm run dev -w utils\" \"npm run dev -w ai\" \"npm run dev -w blog\" \"npm run dev -w chat\" \"npm run dev -w payment\"",
-    "build": "npm run build -w @app/db && concurrently -n auth,user,job,utils,ai,blog,chat,payment,gateway -c blue,green,yellow,magenta,cyan,white,gray,black,red \"npm run build -w auth\" \"npm run build -w user\" \"npm run build -w job\" \"npm run build -w utils\" \"npm run build -w ai\" \"npm run build -w blog\" \"npm run build -w chat\" \"npm run build -w payment\" \"npm run build -w api-gateway\"",
+    "build": "npm run build -w @app/db && concurrently -n auth,user,job,utils,ai,blog,chat,payment -c blue,green,yellow,magenta,cyan,white,gray,black \"npm run build -w auth\" \"npm run build -w user\" \"npm run build -w job\" \"npm run build -w utils\" \"npm run build -w ai\" \"npm run build -w blog\" \"npm run build -w chat\" \"npm run build -w payment\" && npm run build -w api-gateway",
     "start:backend": "npm run start -w api-gateway"
   },
   "devDependencies": {
