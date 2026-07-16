@@ -7,14 +7,14 @@ export const connectKafka = async () => {
     try {
         const kafka = new Kafka({
             clientId: 'auth-service',
-            brokers: [process.env.KAFKA_BROKER_URL!],
+            brokers: [process.env.KAFKA_BROKER_URL || process.env.KAFKA_BROKER || 'localhost:9092'],
             ssl: {
                 rejectUnauthorized: false
             },
             sasl: {
                 mechanism: 'plain',
-                username: process.env.KAFKA_USERNAME!,
-                password: process.env.KAFKA_PASSWORD!,
+                username: process.env.KAFKA_USERNAME || '',
+                password: process.env.KAFKA_PASSWORD || '',
             },
             retry: {
                 initialRetryTime: 300,
@@ -66,7 +66,7 @@ export const publishToTopic = async (topic : string, message : any) => {
 
 
     try {
-        producer.send({
+        await producer.send({
             topic,
             messages : [
                 {
