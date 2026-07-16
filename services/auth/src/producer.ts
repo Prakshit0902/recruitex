@@ -8,7 +8,9 @@ export const connectKafka = async () => {
         const kafka = new Kafka({
             clientId: 'auth-service',
             brokers: [process.env.KAFKA_BROKER_URL!],
-            ssl: true,
+            ssl: {
+                rejectUnauthorized: false
+            },
             sasl: {
                 mechanism: 'plain',
                 username: process.env.KAFKA_USERNAME!,

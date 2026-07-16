@@ -7,7 +7,9 @@ export const startSendMailConsumer = async () => {
         const kafka = new Kafka({
             clientId : 'mail-service',
             brokers : [process.env.KAFKA_BROKER_URL || process.env.KAFKA_BROKER || 'localhost:9092'],
-            ssl: true,
+            ssl: {
+                rejectUnauthorized: false
+            },
             sasl: {
                 mechanism: 'plain',
                 username: process.env.KAFKA_USERNAME || '',
