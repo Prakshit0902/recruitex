@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 const Company = () => {
-  const { loading } = useAppData();
+  const { loading, user } = useAppData();
 
   const addRef = useRef<HTMLButtonElement | null>(null);
 
@@ -66,7 +66,12 @@ const Company = () => {
         },
       });
 
-      setCompanies(data as any);
+      const allComps = data.companies || [];
+      if (user?.role === 'recruiter') {
+        setCompanies(allComps.filter((c: CompanyType) => c.recruiterId === user.userId));
+      } else {
+        setCompanies(allComps);
+      }
     } catch (error) {
       console.log(error);
     } finally {

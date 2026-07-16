@@ -59,7 +59,7 @@ const RegisterPage = () => {
         secure: false,
         path: "/",
       });
-      setUser((data as any).registeredUser);
+      setUser((data as any).user);
       setIsAuth(true);
     } catch (error: any) {
       console.log(error);
