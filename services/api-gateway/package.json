@@ -8,17 +8,18 @@
     "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\""
   },
   "dependencies": {
-    "express": "^4.21.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "auth": "*",
-    "user": "*",
-    "job": "*",
-    "utils": "*",
     "ai": "*",
+    "auth": "*",
     "blog": "*",
     "chat": "*",
-    "payment": "*"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "job": "*",
+    "payment": "*",
+    "socket.io": "^4.8.3",
+    "user": "*",
+    "utils": "*"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

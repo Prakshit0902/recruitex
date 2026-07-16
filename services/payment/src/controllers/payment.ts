@@ -4,7 +4,7 @@ import ErrorHandler from "../utils/errorHandler.js";
 import { db } from "@app/db/client";
 import { users } from "@app/db/schema";
 import { eq } from "drizzle-orm";
-import { instance } from "../index.js";
+import { instance } from "../app.js";
 import crypto from "crypto";
 
 export const checkOut = TryCatch(async (req: AuthenticatedRequest, res) => {

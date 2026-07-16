@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { forgotPasswordTemplate } from "../template.js";
 import { publishToTopic } from "../producer.js";
-import { redis } from "../index.js";
+import { redis } from "../redis.js";
 
 dotenv.config()
 
