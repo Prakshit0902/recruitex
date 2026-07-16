@@ -15,9 +15,9 @@ import { redis } from "../redis.js";
 dotenv.config()
 
 export const registerUser = TryCatch(async (req,res,next) => {
-    const {name,email,password,phoneNumber,role,bio} = req.body
+    const {name,email,password,phoneNumber,role} = req.body
     
-    if (!name || !email || !password || !phoneNumber || !role || !bio){
+    if (!name || !email || !password || !phoneNumber || !role){
         throw new ErrorHandler(400,'Please fill all details')
     }
 
@@ -44,7 +44,7 @@ export const registerUser = TryCatch(async (req,res,next) => {
                     password : hashPassword,
                     phoneNumber : phoneNumber,
                     role : role,
-                    bio : bio
+                    // bio : bio
                 }
 
             )
@@ -99,7 +99,7 @@ export const registerUser = TryCatch(async (req,res,next) => {
                     password : hashPassword,
                     phoneNumber : phoneNumber,
                     role : role,
-                    bio : bio,
+                    // bio : bio,
                     resume : data.url,
                     resumePublicId : data.public_id
                 }
