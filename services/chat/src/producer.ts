@@ -33,7 +33,6 @@ export const connectKafka = async () => {
                     {
                         topic: "send-mail-topic",
                         numPartitions: 1,
-                        replicationFactor: 1,
                     },
                 ],
             });
