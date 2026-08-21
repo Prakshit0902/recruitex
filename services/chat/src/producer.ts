@@ -9,14 +9,12 @@ export const connectKafka = async () => {
     try {
         const kafka = new Kafka({
             clientId: "chat-service",
-            brokers: [process.env.KAFKA_BROKER_URL || process.env.KAFKA_BROKER || "localhost:9092"],
-            ssl: {
-                rejectUnauthorized: false
-            },
+            brokers: [process.env.KAFKA_BROKER || "localhost:9092"],
+            ssl: true,
             sasl: {
-                mechanism: 'plain',
-                username: process.env.KAFKA_USERNAME || '',
-                password: process.env.KAFKA_PASSWORD || '',
+                mechanism: "plain",
+                username: process.env.KAFKA_USERNAME!,
+                password: process.env.KAFKA_PASSWORD!,
             },
             retry: {
                 initialRetryTime: 300,
@@ -29,17 +27,17 @@ export const connectKafka = async () => {
 
         const topics = await admin.listTopics();
 
-        if (!topics.includes("send-mail")) {
+        if (!topics.includes("send-mail-topic")) {
             await admin.createTopics({
                 topics: [
                     {
-                        topic: "send-mail",
+                        topic: "send-mail-topic",
                         numPartitions: 1,
                         replicationFactor: 1,
                     },
                 ],
             });
-            console.log("✅ Topic 'send-mail' created");
+            console.log("✅ Topic 'send-mail-topic' created");
         }
 
         await admin.disconnect();
